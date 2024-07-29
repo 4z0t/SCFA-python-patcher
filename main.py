@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import re
 from typing import Optional
-from PEFile import PEFile
+from PEData import PEData
 
 FLAGS = "-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0 -I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32 -L C:\msys64\mingw32\lib -L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32\\13.1.0"
 
@@ -154,4 +154,8 @@ def main(_, target_path, compiler_path, *args):
 
 
 if __name__ == "__main__":
-    main(*sys.argv)
+    # main(*sys.argv)
+    FILE_PATH = "F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\ForgedAlliance_base.exe"
+    pe = PEData(FILE_PATH)
+
+    print(pe.sects)
