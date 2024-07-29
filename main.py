@@ -64,8 +64,6 @@ def preprocess_lines(lines: list[str]):
                 full_s.replace(address, address_name) + new_line[s_end:]
 
         new_lines.append(new_line)
-    # print(new_lines)
-    print(address_names)
     return new_lines, address_names
 
 
