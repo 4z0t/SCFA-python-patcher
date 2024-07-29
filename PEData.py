@@ -26,8 +26,11 @@ class BasicBinaryParser:
         self._pos += size
         return b
 
+    def values(self, type: str) -> tuple[Any, ...]:
+        return struct.unpack(type, self.read_bytes(struct.calcsize(type)))
+
     def value(self, type: str) -> Any:
-        return struct.unpack(type, self.read_bytes(struct.calcsize(type)))[0]
+        return self.values(type)[0]
 
     def read_int(self):
         return self.value("i")
