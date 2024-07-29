@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 
+@dataclass
 class PESect:
     name: str
     v_size: int
@@ -13,15 +14,14 @@ class PESect:
 
     @staticmethod
     def from_bytes(b: bytes):
-        pesect = PESect()
-        pesect.name = b[0:8].decode().replace("\x00", '')
-        pesect.v_size = int.from_bytes(b[8:12], "little", signed=True)
-        pesect.v_offset = int.from_bytes(b[12:16], "little", signed=True)
-        pesect.f_size = int.from_bytes(b[16:20], "little", signed=True)
-        pesect.f_offset = int.from_bytes(b[20:24], "little", signed=True)
-        pesect.pad = b[24:36]
-        pesect.flags = int.from_bytes(b[36:40], "little", signed=False)
-        return pesect
+        return PESect(
+            name=b[0:8].decode().replace("\x00", ''),
+            v_size=int.from_bytes(b[8:12], "little", signed=True),
+            v_offset=int.from_bytes(b[12:16], "little", signed=True),
+            f_size=int.from_bytes(b[16:20], "little", signed=True),
+            f_offset=int.from_bytes(b[20:24], "little", signed=True),
+            pad=b[24:36],
+            flags=int.from_bytes(b[36:40], "little", signed=False))
 
 
 class PEData:

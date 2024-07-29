@@ -157,3 +157,4 @@ if __name__ == "__main__":
     # main(*sys.argv)
     FILE_PATH = "F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\ForgedAlliance_base.exe"
     pe = PEData(FILE_PATH)
+    print(pe.sects)
