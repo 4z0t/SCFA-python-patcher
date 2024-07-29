@@ -29,6 +29,12 @@ class BasicBinaryParser:
     def value(self, type: str) -> Any:
         return struct.unpack(type, self.read_bytes(struct.calcsize(type)))[0]
 
+    def read_int(self):
+        return self.value("i")
+
+    def read_uint(self):
+        return self.value("I")
+
 
 @dataclass
 class PESect:
@@ -74,12 +80,6 @@ class PEData(BasicBinaryParser):
 
         self.parse_sects_data()
 
-    def read_int(self):
-        return self.value("i")
-
-    def read_uint(self):
-        return self.value("I")
-
     def parse_sects_data(self):
         self._pos += 0x3c
         self.offset = self.read_uint()
@@ -94,8 +94,7 @@ class PEData(BasicBinaryParser):
 
         self._pos = self.offset + 0xf8
         for i in range(sect_count):
-            b = self.read_bytes(40)
-            self.sects.append(PESect.from_bytes(b))
+            self.sects.append(PESect.from_bytes(self.read_bytes(40)))
 
     def find_sect(self, name: str) -> Optional[PESect]:
         for sect in self.sects:
