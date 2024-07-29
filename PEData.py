@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 
 class PESect:
@@ -13,7 +14,7 @@ class PESect:
     @staticmethod
     def from_bytes(b: bytes):
         pesect = PESect()
-        pesect.name = b[0:8].decode()
+        pesect.name = b[0:8].decode().replace("\x00", '')
         pesect.v_size = int.from_bytes(b[8:12], "little", signed=True)
         pesect.v_offset = int.from_bytes(b[12:16], "little", signed=True)
         pesect.f_size = int.from_bytes(b[16:20], "little", signed=True)
@@ -68,3 +69,9 @@ class PEData:
         for i in range(sect_count):
             b = self.read_bytes(40)
             self.sects.append(PESect.from_bytes(b))
+
+    def find_sect(self, name: str) -> Optional[PESect]:
+        for sect in self.sects:
+            if sect.name == name:
+                return sect
+        return None
