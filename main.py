@@ -2,17 +2,37 @@ import sys
 import os
 from pathlib import Path
 import re
+from typing import Optional
+
+FLAGS = "-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0 -I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32 -L C:\msys64\mingw32\lib -L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32\\13.1.0"
 
 
-def find_patch_files(dir_path_s: str):
-    dir_path = Path(dir_path_s)
-    pathlist = dir_path.glob('**/*.cpp')
+def scan_header_files(target_path: str):
+    functions_addresses = []
+    contents = read_files_contents(
+        f"{target_path}/section/include/",
+        list_files_at(f"{target_path}/section/include/", "**/*.h"))
 
-    paths = [path.name for path in pathlist if path.name != "main.cpp"]
+    for line in contents:
+        matches = re.finditer(
+            r"(asm\(\"(0[xX][0-9a-fA-F]{1,8})\"\);)", line, re.IGNORECASE)
+        for match in matches:
+            functions_addresses.append(match.group(2))  # get address
+    return functions_addresses
+
+
+def list_files_at(folder: str, pattern: str, exclude: Optional[list[str]] = None):
+    dir_path = Path(folder)
+    pathlist = dir_path.glob(pattern)
+
+    paths = [path.name for path in pathlist]
+    if exclude is not None:
+        paths = [path for path in paths if path not in exclude]
     return paths
 
 
-FLAGS = "-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0 -I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32 -L C:\msys64\mingw32\lib -L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32\\13.1.0"
+def find_patch_files(dir_path_s: str):
+    return list_files_at(dir_path_s, "**/*.cpp", ["main.cpp"])
 
 
 def preprocess_build_files(target_path, build_dir, paths):
@@ -98,6 +118,28 @@ def create_sections_file(path, address_map):
         f.write(SECTIONS)
 
 
+def parse_sect_map(file_path):
+    addresses = {}
+    with open(file_path, "r") as f:
+        line = f.readline()
+        while not line.startswith(" .text"):
+            line = f.readline()
+
+        line = f.readline()
+        while not line.startswith(" *(.data*)"):
+            address, name = re.sub(" +", " ", line.strip()).split(" ")
+            name = name.split("(")[0]
+
+            if name in addresses:
+                raise Exception(f"Duplicated name for patch function {name}")
+
+            addresses[name] = address
+
+            line = f.readline()
+
+    return addresses
+
+
 def main(_, target_path, compiler_path, *args):
     paths = find_patch_files(f"{target_path}/section/")
 
@@ -107,13 +149,16 @@ def main(_, target_path, compiler_path, *args):
     with open(f"{target_path}/section/main.cpp", "w") as main_file:
         main_file.writelines(files_contents)
 
-    # preprocess_build_files(f"{target_path}/section/",
-    #                        f"{target_path}/build/section/", paths)
+    function_addresses = {
+        name: name for name in scan_header_files(target_path)}
 
-    create_sections_file(f"{target_path}/section.ld", address_names)
-
+    create_sections_file(f"{target_path}/section.ld",
+                         address_names | function_addresses)
     print(os.system(
-        f"{compiler_path} {FLAGS} -Wl,-T,{target_path}/section.ld,--image-base,45000,-s,-Map,sectmap.txt {target_path}/section/main.cpp"))
+        f"{compiler_path} {FLAGS} -Wl,-T,{target_path}/section.ld,--image-base,45000,-s,-Map,{target_path}/sectmap.txt {target_path}/section/main.cpp -o {target_path}/build/out.o"))
+
+    addresses = parse_sect_map(f"{target_path}/sectmap.txt")
+    print(addresses)
 
 
 if __name__ == "__main__":
