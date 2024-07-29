@@ -91,9 +91,7 @@ class PEData(BasicBinaryParser):
         sect_count = self.value("H")
 
         self.pos = self.offset + 0x34
-        self.imgbase = self.read_uint()
-        self.sectalign = self.read_uint()
-        self.filealign = self.read_uint()
+        self.imgbase, self.sectalign, self.filealign = self.values("3I")
 
         self.pos = self.offset + 0xf8
         for i in range(sect_count):
