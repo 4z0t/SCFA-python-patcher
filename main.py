@@ -155,10 +155,13 @@ def main(_, target_path, compiler_path, *args):
     create_sections_file(f"{target_path}/section.ld",
                          address_names | function_addresses)
     print(os.system(
-        f"{compiler_path} {FLAGS} -Wl,-T,{target_path}/section.ld,--image-base,45000,-s,-Map,{target_path}/sectmap.txt {target_path}/section/main.cpp -o {target_path}/build/out.o"))
+        f"{compiler_path} {FLAGS} -Wl,-T,{target_path}/section.ld,--image-base,45000,-s,-Map,{target_path}/sectmap.txt {target_path}/section/main.cpp"))
 
     addresses = parse_sect_map(f"{target_path}/sectmap.txt")
     print(addresses)
+
+    print(os.system(
+        f"cd {target_path}/build & {compiler_path} -c {FLAGS} {target_path}/hooks/*.cpp"))
 
 
 if __name__ == "__main__":
