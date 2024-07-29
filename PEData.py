@@ -81,18 +81,18 @@ class PEData(BasicBinaryParser):
         self.parse_sects_data()
 
     def parse_sects_data(self):
-        self._pos += 0x3c
+        self.pos += 0x3c
         self.offset = self.read_uint()
 
-        self._pos = self.offset + 0x6
+        self.pos = self.offset + 0x6
         sect_count = self.value("H")
 
-        self._pos = self.offset + 0x34
+        self.pos = self.offset + 0x34
         self.imgbase = self.read_uint()
         self.sectalign = self.read_uint()
         self.filealign = self.read_uint()
 
-        self._pos = self.offset + 0xf8
+        self.pos = self.offset + 0xf8
         for i in range(sect_count):
             self.sects.append(PESect.from_bytes(self.read_bytes(40)))
 
