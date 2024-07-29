@@ -22,28 +22,18 @@ def scan_header_files(target_path: str):
     return functions_addresses
 
 
-def list_files_at(folder: str, pattern: str, exclude: Optional[list[str]] = None):
+def list_files_at(folder: str, pattern: str, excluded: Optional[list[str]] = None):
     dir_path = Path(folder)
     pathlist = dir_path.glob(pattern)
 
     paths = [path.name for path in pathlist]
-    if exclude is not None:
-        paths = [path for path in paths if path not in exclude]
+    if excluded is not None:
+        paths = [path for path in paths if path not in excluded]
     return paths
 
 
 def find_patch_files(dir_path_s: str):
     return list_files_at(dir_path_s, "**/*.cpp", ["main.cpp"])
-
-
-def preprocess_build_files(target_path, build_dir, paths):
-
-    for path in paths:
-        print(path)
-        with open(target_path+path, "r") as read_file:
-            with open(build_dir+path, "w") as write_file:
-
-                write_file.write(read_file.read())
 
 
 def read_files_contents(dir_path, paths):
