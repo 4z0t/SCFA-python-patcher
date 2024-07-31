@@ -5,8 +5,8 @@ import struct
 
 class BasicBinaryParser:
 
-    def __init__(self, bytes: bytes) -> None:
-        self._data: bytes = bytes
+    def __init__(self, data: bytes) -> None:
+        self._data: bytes = data
         self._pos: int = 0
 
     @property
