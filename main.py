@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 import re
 from typing import Optional
-from PEData import PEData
 
 FLAGS = " ".join(["-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=sse",
                  "-stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0",
