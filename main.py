@@ -1,3 +1,4 @@
+from PEData import PEData
 import sys
 import os
 from pathlib import Path
@@ -130,6 +131,21 @@ def parse_sect_map(file_path):
 
 
 def main(_, target_path, compiler_path, *args):
+
+    pe = PEData(f"{target_path}/ForgedAlliance_base.exe")
+    new_v_offset = 0
+    new_f_offset = 0
+
+    for sect in pe.sects:
+        new_v_offset = max(sect.v_offset + sect.v_size, new_v_offset)
+        new_f_offset = max(sect.f_offset + sect.f_size, new_f_offset)
+
+    def align(v, a):
+        return (v + a-1) & (~(a-1))
+
+    new_v_offset = align(new_v_offset, pe.sectalign)
+    new_f_offset = align(new_f_offset, pe.filealign)
+
     paths = find_patch_files(f"{target_path}/section/")
 
     files_contents = read_files_contents(f"{target_path}/section/", paths)
@@ -143,8 +159,9 @@ def main(_, target_path, compiler_path, *args):
 
     create_sections_file(f"{target_path}/section.ld",
                          address_names | function_addresses)
+    print(f"Image base: {pe.imgbase + new_v_offset - 0x1000:x}")
     print(os.system(
-        f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,45000,-s,-Map,../sectmap.txt ../section/main.cpp"))
+        f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,{pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt ../section/main.cpp"))
 
     addresses = parse_sect_map(f"{target_path}/sectmap.txt")
     print(addresses)
@@ -154,7 +171,7 @@ def main(_, target_path, compiler_path, *args):
 
 
 if __name__ == "__main__":
-    # main(*sys.argv)
-    FILE_PATH = "F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\ForgedAlliance_base.exe"
-    pe = PEData(FILE_PATH)
-    print(pe.sects)
+    main(*sys.argv)
+    # FILE_PATH = "F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\ForgedAlliance_base.exe"
+    # pe = PEData(FILE_PATH)
+    # print(pe.sects)
