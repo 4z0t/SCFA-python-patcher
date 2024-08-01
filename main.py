@@ -49,6 +49,7 @@ def read_files_contents(dir_path, paths):
     for path in paths:
         with open(dir_path + path, "r")as f:
             files_contents.extend(f.readlines())
+            files_contents.append("\n")
 
     return files_contents
 
@@ -167,14 +168,16 @@ def main(_, target_path, compiler_path, linker_path, *args):
     create_sections_file(f"{target_path}/section.ld",
                          address_names | function_addresses)
     print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
-    print(os.system(
-        f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"))
+    if (os.system(
+            f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp")):
+        raise Exception("Errors occured during building of patch files")
 
     addresses = parse_sect_map(f"{target_path}/sectmap.txt")
     print(addresses)
 
-    print(os.system(
-        f"cd {target_path}/build & {compiler_path} -c {FLAGS} ../hooks/*.cpp"))
+    if (os.system(
+            f"cd {target_path}/build & {compiler_path} -c {FLAGS} ../hooks/*.cpp")):
+        raise Exception("Errors occured during building of hooks files")
 
     hooks: list[COFFData] = []
     for path in list_files_at(f"{target_path}/build", "**/*.o"):
