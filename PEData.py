@@ -27,6 +27,16 @@ class PESect:
             f_offset=f_offset,
             flags=flags)
 
+    def to_bytes(self) -> bytes:
+        return struct.pack("8s4i12xI",
+                           self.name.encode(),
+                           self.v_size,
+                           self.v_offset,
+                           self.f_size,
+                           self.f_offset,
+                           self.flags,
+                           )
+
 
 class PEData(BasicBinaryParser):
     def __init__(self, file_path: str) -> None:

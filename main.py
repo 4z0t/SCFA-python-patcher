@@ -5,12 +5,15 @@ import os
 from pathlib import Path
 import re
 from typing import Optional
+import struct
 
 FLAGS = " ".join(["-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=sse",
                  "-stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0",
                   "-I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32",
                   "-L C:\msys64\mingw32\lib",
                   "-L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32/13.1.0"])
+
+SECT_SIZE = 0x80000
 
 
 def scan_header_files(target_path: str):
@@ -136,19 +139,19 @@ def parse_sect_map(file_path):
 
 def main(_, target_path, compiler_path, linker_path, *args):
 
-    pe = PEData(f"{target_path}/ForgedAlliance_base.exe")
+    base_pe = PEData(f"{target_path}/ForgedAlliance_base.exe")
     new_v_offset = 0
     new_f_offset = 0
 
-    for sect in pe.sects:
+    for sect in base_pe.sects:
         new_v_offset = max(sect.v_offset + sect.v_size, new_v_offset)
         new_f_offset = max(sect.f_offset + sect.f_size, new_f_offset)
 
     def align(v, a):
         return (v + a-1) & (~(a-1))
 
-    new_v_offset = align(new_v_offset, pe.sectalign)
-    new_f_offset = align(new_f_offset, pe.filealign)
+    new_v_offset = align(new_v_offset, base_pe.sectalign)
+    new_f_offset = align(new_f_offset, base_pe.filealign)
 
     paths = find_patch_files(f"{target_path}/section/")
 
@@ -163,9 +166,9 @@ def main(_, target_path, compiler_path, linker_path, *args):
 
     create_sections_file(f"{target_path}/section.ld",
                          address_names | function_addresses)
-    print(f"Image base: {pe.imgbase + new_v_offset - 0x1000:x}")
+    print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
     print(os.system(
-        f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,{pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"))
+        f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"))
 
     addresses = parse_sect_map(f"{target_path}/sectmap.txt")
     print(addresses)
@@ -181,9 +184,9 @@ def main(_, target_path, compiler_path, linker_path, *args):
                 raise Exception(f"sect name too long {sect.name}")
             if sect.size == 0:
                 raise Exception(f"sect size is invalid")
-            if sect.offset < pe.imgbase:
+            if sect.offset < base_pe.imgbase:
                 raise Exception(
-                    f"sect offset is larger than image base: {sect.offset:x}, base {pe.imgbase:x}")
+                    f"sect offset is larger than image base: {sect.offset:x}, base {base_pe.imgbase:x}")
         hooks.append(coff_data)
 
     section_pe = PEData(f"{target_path}/build/section.pe")
@@ -210,14 +213,74 @@ def main(_, target_path, compiler_path, linker_path, *args):
                     " }\n",
                 ])
                 hi += 1
-        pld.writelines([f"  .exxt 0x{pe.imgbase + new_v_offset:x}: {{\n",
+        pld.writelines([f"  .exxt 0x{base_pe.imgbase + new_v_offset:x}: {{\n",
                         f"  . = . + {ssize};\n",
                         "    *(.data)\n    *(.bss)\n    *(.rdata)\n  }\n",
                         "  /DISCARD/ : {\n    *(.text)\n    *(.text.startup)\n",
                         "    *(.rdata$zzz)\n    *(.eh_frame)\n    *(.ctors)\n    *(.reloc)\n  }\n}"
                         ])
     print(os.system(
-        f"cd {target_path} & {linker_path} -T patch.ld --image-base {pe.imgbase} -s -Map build/patchmap.txt"))
+        f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"))
+
+    base_file_data = base_pe.data
+
+    def replace_data(new_data, offset):
+        nonlocal base_file_data
+        base_file_data = base_file_data[:offset] + \
+            new_data + base_file_data[offset+len(new_data):]
+
+    patch_pe = PEData(f"{target_path}/build/patch.pe")
+    hi = 0
+    for hook in hooks:
+        if len(hook.sects) == 0:
+            print(f"No hooks in {hook.name}")
+        for sect in hook.sects:
+            psect = patch_pe.find_sect(f".h{hi}")
+            size = sect.size
+            replace_data(
+                patch_pe.data[psect.f_offset:psect.f_offset + size], psect.v_offset)
+            hi += 1
+
+    exxt_sect = patch_pe.find_sect(".exxt")
+    nsect = PESect(exxt_sect.name,
+                   exxt_sect.v_size,
+                   new_v_offset,
+                   exxt_sect.f_size,
+                   new_f_offset,
+                   0xE0000060
+                   )
+    base_pe.sects.append(nsect)
+    if SECT_SIZE > 0:
+        if SECT_SIZE < exxt_sect.f_size:
+            raise Exception(
+                f"Section size too small. Required: 0x{exxt_sect.f_size:x}")
+
+        exxt_sect.v_size = SECT_SIZE
+        exxt_sect.f_size = SECT_SIZE
+
+    replace_data(
+        patch_pe.data[exxt_sect.f_offset:exxt_sect.f_offset + exxt_sect.f_size], nsect.v_offset)
+
+    for s in section_pe.sects:
+        replace_data(section_pe.data[s.f_offset:s.f_offset+s.f_size],
+                     nsect.f_offset+s.v_offset-section_pe.sects[0].v_offset)
+
+    def save_new_base_data(data):
+        with open(f"{target_path}/ForgedAlliance_exxt.exe", "wb") as nf:
+            sect_count = len(base_pe.sects)
+            nf.write(base_file_data)
+            nf.seek(base_pe.offset+0x6)
+            nf.write(struct.pack("H", sect_count))
+            img_size = base_pe.sects[-1].v_offset + base_pe.sects[-1].v_size
+
+            nf.seek(base_pe.offset+0x50)
+            nf.write(struct.pack("I", img_size))
+
+            nf.seek(base_pe.offset+0xf8)
+            for sect in base_pe.sects:
+                nf.write(sect.to_bytes())
+
+    save_new_base_data(base_file_data)
 
 
 if __name__ == "__main__":
