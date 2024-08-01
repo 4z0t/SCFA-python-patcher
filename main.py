@@ -1,5 +1,5 @@
-from PEData import PEData
-from COFFData import COFFData
+from PEData import PEData, PESect
+from COFFData import COFFData, COFFSect
 import sys
 import os
 from pathlib import Path
@@ -75,15 +75,15 @@ def preprocess_lines(lines: list[str]):
 def create_sections_file(path, address_map):
 
     HEADER = """
-    OUTPUT_FORMAT(pei-i386)
-    OUTPUT(section.pe)
+OUTPUT_FORMAT(pei-i386)
+OUTPUT(section.pe)
     """
     FUNC_NAMES = """
-    _atexit  = 0xA8211E;
-    __Znwj   = 0xA825B9;
-    __ZdlPvj = 0x958C40;
-    "__imp__GetModuleHandleA@4" = 0xC0F378;
-    "__imp__GetProcAddress@8" = 0xC0F48C;
+_atexit  = 0xA8211E;
+__Znwj   = 0xA825B9;
+__ZdlPvj = 0x958C40;
+"__imp__GetModuleHandleA@4" = 0xC0F378;
+"__imp__GetProcAddress@8" = 0xC0F48C;
     """
     SECTIONS = """
     SECTIONS {
@@ -134,7 +134,7 @@ def parse_sect_map(file_path):
     return addresses
 
 
-def main(_, target_path, compiler_path, *args):
+def main(_, target_path, compiler_path, linker_path, *args):
 
     pe = PEData(f"{target_path}/ForgedAlliance_base.exe")
     new_v_offset = 0
@@ -165,7 +165,7 @@ def main(_, target_path, compiler_path, *args):
                          address_names | function_addresses)
     print(f"Image base: {pe.imgbase + new_v_offset - 0x1000:x}")
     print(os.system(
-        f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,{pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt ../section/main.cpp"))
+        f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,{pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"))
 
     addresses = parse_sect_map(f"{target_path}/sectmap.txt")
     print(addresses)
@@ -173,11 +173,52 @@ def main(_, target_path, compiler_path, *args):
     print(os.system(
         f"cd {target_path}/build & {compiler_path} -c {FLAGS} ../hooks/*.cpp"))
 
+    hooks: list[COFFData] = []
+    for path in list_files_at(f"{target_path}/build", "**/*.o"):
+        coff_data = COFFData(f"{target_path}/build/{path}", f"build/{path}")
+        for sect in coff_data.sects:
+            if len(sect.name) >= 8:
+                raise Exception(f"sect name too long {sect.name}")
+            if sect.size == 0:
+                raise Exception(f"sect size is invalid")
+            if sect.offset < pe.imgbase:
+                raise Exception(
+                    f"sect offset is larger than image base: {sect.offset:x}, base {pe.imgbase:x}")
+        hooks.append(coff_data)
+
+    section_pe = PEData(f"{target_path}/build/section.pe")
+    ssize = section_pe.sects[-1].v_offset + \
+        section_pe.sects[-1].v_size + section_pe.sects[0].v_offset
+    print(ssize)
+
+    with open(f"{target_path}/patch.ld", "w") as pld:
+        pld.writelines(["OUTPUT_FORMAT(pei-i386)\n",
+                        "OUTPUT(build/patch.pe)\n",
+                        "SECTIONS {\n"
+                        ])
+        hi = 0
+        for hook in hooks:
+            for sect in hook.sects:
+                pld.writelines([
+                    f" .h{hi} 0x{sect.offset:x} : SUBALIGN(1) {{\n",
+                    f"     {hook.name}({sect.name})\n",
+                    " }\n",
+                ])
+                hi += 1
+        pld.writelines([f"  .exxt 0x{pe.imgbase + new_v_offset:x}: {{\n",
+                        f"  . = . + {ssize};\n",
+                        "    *(.data)\n    *(.bss)\n    *(.rdata)\n  }\n",
+                        "  /DISCARD/ : {\n    *(.text)\n    *(.text.startup)\n",
+                        "    *(.rdata$zzz)\n    *(.eh_frame)\n    *(.ctors)\n    *(.reloc)\n  }\n}"
+                        ])
+    print(os.system(
+        f"cd {target_path} & {linker_path} -T patch.ld --image-base {pe.imgbase} -s -Map build/patchmap.txt"))
+
 
 if __name__ == "__main__":
-    # main(*sys.argv)
+    main(*sys.argv)
     # FILE_PATH = "F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\ForgedAlliance_base.exe"
     # pe = PEData(FILE_PATH)
     # print(pe.sects)
-    coff = COFFData(
-        r"F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\build\SetStatFix.o")
+    # coff = COFFData(
+    #     r"F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\build\SetStatFix.o")

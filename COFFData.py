@@ -21,9 +21,9 @@ class COFFSect:
 
 
 class COFFData(BasicBinaryParser):
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, name: str = None) -> None:
         data: bytes = None
-        self.name: str = file_path
+        self.name: str = name or file_path
         self.sects: list[COFFSect] = []
         with open(file_path, "rb") as f:
             data = f.read()
