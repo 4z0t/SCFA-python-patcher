@@ -104,7 +104,7 @@ __ZdlPvj = 0x958C40;
             *(.bss*)
             *(.rdata)
         }
-         .ctors : {
+        .ctors : {
             _FIRST_CTOR = .;
             *(.ctors)
             *(.CRT*)
