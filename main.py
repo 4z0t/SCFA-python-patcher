@@ -8,7 +8,8 @@ from typing import Optional
 import struct
 
 FLAGS = " ".join(["-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=sse",
-                 "-stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0",
+                  "-fseh-exceptions",
+                  "-stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0",
                   "-I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32",
                   "-L C:\msys64\mingw32\lib",
                   "-L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32/13.1.0"])
@@ -127,11 +128,17 @@ def parse_sect_map(file_path):
 
         line = f.readline()
         while not line.startswith(" *(.data*)"):
+            items = re.sub(
+                " +", " ", line.strip()).split("(")[0].split(" ")
+            if len(items) != 2:
+                break
+
             address, name = re.sub(
                 " +", " ", line.strip()).split("(")[0].split(" ")
 
             if name in addresses:
-                raise Exception(f"Duplicated name for patch function {name}")
+                raise Exception(
+                    f"Duplicated name for patch function {name}")
 
             addresses[name] = address
 
