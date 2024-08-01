@@ -194,7 +194,12 @@ def main(_, target_path, compiler_path, linker_path, *args):
     with open(f"{target_path}/patch.ld", "w") as pld:
         pld.writelines(["OUTPUT_FORMAT(pei-i386)\n",
                         "OUTPUT(build/patch.pe)\n",
-                        "SECTIONS {\n"
+                        ])
+
+        for name, address in addresses.items():
+            pld.write(f"\"{name}\" = {address};\n")
+
+        pld.writelines(["SECTIONS {\n"
                         ])
         hi = 0
         for hook in hooks:
