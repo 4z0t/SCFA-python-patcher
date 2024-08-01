@@ -49,10 +49,42 @@ class COFFData(BasicBinaryParser):
         pos, count = self.values("II")
         self.pos = pos
 
-        for i in range(count):
-            pass
+        assert struct.calcsize("8sI5xb") == 18
+        assert struct.calcsize("I14x") == 18
 
-    def find_sect(self, name) -> Optional[COFFSect]:
+        i = 0
+        while i < count:
+            i += 1
+            name, offset, c = struct.unpack("8sI5xb", self.read_bytes(18))
+            name: str = name.decode().replace("\x00", "")
+            sect = self.find_sect(name)
+
+            if sect is None:
+                self.pos += c * 18
+                i += c
+                continue
+
+            if c > 0:
+                size = struct.unpack("I14x", self.read_bytes(18))[0]
+                sect.size = size
+                i += 1
+                continue
+            sect.offset = offset
+
+        self.pos = 20
+        for i in range(sect_count):
+            name = struct.unpack("8s", self.read_bytes(8))[0]
+            name: str = name.decode().replace("\x00", "")
+            sect = self.find_sect(name)
+            if sect is not None:
+                self.pos += 8
+                # write sect size?
+                continue
+            self.pos += 0x20
+
+        print(self.sects)
+
+    def find_sect(self, name: str) -> Optional[COFFSect]:
         for sect in self.sects:
             if sect.name == name:
                 return sect

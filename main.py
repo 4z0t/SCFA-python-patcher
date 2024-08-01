@@ -1,4 +1,5 @@
 from PEData import PEData
+from COFFData import COFFData
 import sys
 import os
 from pathlib import Path
@@ -174,7 +175,9 @@ def main(_, target_path, compiler_path, *args):
 
 
 if __name__ == "__main__":
-    main(*sys.argv)
+    # main(*sys.argv)
     # FILE_PATH = "F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\ForgedAlliance_base.exe"
     # pe = PEData(FILE_PATH)
     # print(pe.sects)
+    coff = COFFData(
+        r"F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\build\SetStatFix.o")
