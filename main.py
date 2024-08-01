@@ -13,6 +13,8 @@ FLAGS = " ".join(["-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std
                   "-L C:\msys64\mingw32\lib",
                   "-L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32/13.1.0"])
 
+HOOKS_FLAGS = " ".join(["-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=sse",
+                        ])
 SECT_SIZE = 0x80000
 
 
@@ -125,8 +127,8 @@ def parse_sect_map(file_path):
 
         line = f.readline()
         while not line.startswith(" *(.data*)"):
-            address, name = re.sub(" +", " ", line.strip()).split(" ")
-            name = name.split("(")[0]
+            address, name = re.sub(
+                " +", " ", line.strip()).split("(")[0].split(" ")
 
             if name in addresses:
                 raise Exception(f"Duplicated name for patch function {name}")
@@ -138,7 +140,7 @@ def parse_sect_map(file_path):
     return addresses
 
 
-def main(_, target_path, compiler_path, linker_path, *args):
+def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
 
     base_pe = PEData(f"{target_path}/ForgedAlliance_base.exe")
     new_v_offset = 0
@@ -175,8 +177,7 @@ def main(_, target_path, compiler_path, linker_path, *args):
     addresses = parse_sect_map(f"{target_path}/sectmap.txt")
     print(addresses)
 
-    if (os.system(
-            f"cd {target_path}/build & {compiler_path} -c {FLAGS} ../hooks/*.cpp")):
+    if (os.system(f"cd {target_path}/build & {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp")):
         raise Exception("Errors occured during building of hooks files")
 
     hooks: list[COFFData] = []

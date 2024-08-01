@@ -75,7 +75,10 @@ class COFFData(BasicBinaryParser):
         data = self.data
         for i in range(sect_count):
             name = struct.unpack("8s", self.read_bytes(8))[0]
-            name: str = name.decode().replace("\x00", "")
+            try:
+                name: str = name.decode().replace("\x00", "")
+            except UnicodeDecodeError:
+                name = ""
             sect = self.find_sect(name)
             if sect is not None:
                 self.pos += 8

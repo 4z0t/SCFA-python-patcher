@@ -1,1 +1,1 @@
-python main.py F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE C:\msys64\mingw64\bin\clang.exe  C:\msys64\mingw32\bin\ld.exe
+C:\ProgramData\FAForever\bin\ForgedAlliance_exxt.exe /init init-dev.lua /nobugreport /log .\\logs\\game.log /EnableDiskWatch /showlog
