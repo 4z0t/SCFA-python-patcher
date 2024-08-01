@@ -91,6 +91,9 @@ __Znwj   = 0xA825B9;
 __ZdlPvj = 0x958C40;
 "__imp__GetModuleHandleA@4" = 0xC0F378;
 "__imp__GetProcAddress@8" = 0xC0F48C;
+"___CxxFrameHandler3" = 0xA8958C;
+"___std_terminate" = 0xA994FB; /*idk addr*/
+"??_7type_info@@6B@" = 0xD72A88;
     """
     SECTIONS = """
     SECTIONS {
@@ -101,10 +104,15 @@ __ZdlPvj = 0x958C40;
             *(.bss*)
             *(.rdata)
         }
+         .ctors : {
+            _FIRST_CTOR = .;
+            *(.ctors)
+            *(.CRT*)
+            _END_CTOR = .;
+        }
         /DISCARD/ : {
             *(.rdata$zzz)
             *(.eh_frame*)
-            *(.ctors)
             *(.reloc)
             *(.idata*)
         }
