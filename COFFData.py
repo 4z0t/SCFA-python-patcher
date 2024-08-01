@@ -33,9 +33,9 @@ class COFFData(BasicBinaryParser):
 
         super().__init__(data)
 
-        self.parse_sects_data()
+        self.parse_sects_data(file_path)
 
-    def parse_sects_data(self):
+    def parse_sects_data(self, file_path: str):
         self.pos = 2
         sect_count = self.value("H")
         self.pos = 20
@@ -72,15 +72,20 @@ class COFFData(BasicBinaryParser):
             sect.offset = offset
 
         self.pos = 20
+        data = self.data
         for i in range(sect_count):
             name = struct.unpack("8s", self.read_bytes(8))[0]
             name: str = name.decode().replace("\x00", "")
             sect = self.find_sect(name)
             if sect is not None:
                 self.pos += 8
-                # write sect size?
+                size_bytes = struct.pack("I", sect.size)
+                data = data[:self.pos] + size_bytes + data[self.pos + 4:]
                 continue
             self.pos += 0x20
+
+        with open(file_path, "wb") as f:
+            f.write(data)
 
         print(self.sects)
 
