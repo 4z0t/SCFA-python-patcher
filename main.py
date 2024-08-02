@@ -127,6 +127,12 @@ __ZdlPvj = 0x958C40;
         f.write(SECTIONS)
 
 
+def create_cxx_sections_file(path, address_map):
+    with open(path, "w") as f:
+        for name, address in address_map.items():
+            f.write(f"\"{name}\" = {address};\n")
+
+
 def parse_sect_map(file_path):
     addresses = {}
     with open(file_path, "r") as f:
@@ -153,6 +159,13 @@ def parse_sect_map(file_path):
             line = f.readline()
 
     return addresses
+
+
+def remove_files_at(folder, pattern):
+    dir_path = Path(folder)
+    pathlist = dir_path.glob(pattern)
+    for p in pathlist:
+        p.unlink()
 
 
 def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
@@ -182,12 +195,20 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     function_addresses = {
         name: name for name in scan_header_files(target_path)}
 
+    # create_cxx_sections_file(
+    #     f"{target_path}/cxxsection.ld", function_addresses)
+
+    # if (os.system(f"cd {target_path}/build & {compiler_path} {PRE_FLAGS} ../section/*.cxx -o clangfiles.o")):
+    #     raise Exception("Errors occured during building of cxx files")
+
     create_sections_file(f"{target_path}/section.ld",
                          address_names | function_addresses)
     print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
     if (os.system(
             f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp")):
         raise Exception("Errors occured during building of patch files")
+
+    remove_files_at(f"{target_path}/build", "**/.o")
 
     addresses = parse_sect_map(f"{target_path}/sectmap.txt")
     print(addresses)
@@ -300,6 +321,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
                 nf.write(sect.to_bytes())
 
     save_new_base_data(base_file_data)
+    remove_files_at(f"{target_path}/build", "**/*.o")
 
 
 if __name__ == "__main__":
