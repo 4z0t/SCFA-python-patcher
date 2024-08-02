@@ -159,8 +159,7 @@ def parse_sect_map(file_path):
                 line = f.readline()
                 continue
 
-            address, name = re.sub(
-                " +", " ", line.strip()).split("(")[0].split(" ")
+            address, name = items
 
             if name in addresses:
                 raise Exception(
@@ -170,6 +169,41 @@ def parse_sect_map(file_path):
 
             line = f.readline()
 
+        line = f.readline()
+        while not line.startswith(" *(.bss*)"):
+            items = re.sub(
+                " +", " ", line.strip()).split(" ")
+            if len(items) != 2:
+                line = f.readline()
+                continue
+
+            address, name = items
+
+            if name in addresses:
+                raise Exception(
+                    f"Duplicated name for patch function {name}")
+
+            addresses[name] = address
+
+            line = f.readline()
+
+        line = f.readline()
+        while not line.startswith(" *(.rdata)"):
+            items = re.sub(
+                " +", " ", line.strip()).split(" ")
+            if len(items) != 2 or items[1].startswith("?"):
+                line = f.readline()
+                continue
+
+            address, name = items
+
+            if name in addresses:
+                raise Exception(
+                    f"Duplicated name for patch function {name}")
+
+            addresses[name] = address
+
+            line = f.readline()
     return addresses
 
 
@@ -228,6 +262,16 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     remove_files_at(f"{target_path}/build", "**/*.o")
 
     addresses = parse_sect_map(f"{target_path}/sectmap.txt")
+
+    def create_defines_file(path, addresses):
+        with open(path, "w") as f:
+            f.writelines([
+                "#define QUAUX(X) #X\n",
+                "#define QU(X) QUAUX(X)\n\n"
+            ])
+            for name, address in addresses.items():
+                f.write(f"#define {name} {address}\n")
+    create_defines_file(f"{target_path}/define.h", addresses)
     print(addresses)
 
     if (os.system(f"cd {target_path}/build & {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp")):

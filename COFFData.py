@@ -56,7 +56,10 @@ class COFFData(BasicBinaryParser):
         while i < count:
             i += 1
             name, offset, c = struct.unpack("8sI5xb", self.read_bytes(18))
-            name: str = name.decode().replace("\x00", "")
+            try:
+                name: str = name.decode().replace("\x00", "")
+            except UnicodeDecodeError:
+                name = ""
             sect = self.find_sect(name)
 
             if sect is None:
