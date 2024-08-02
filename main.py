@@ -155,7 +155,7 @@ def parse_sect_map(file_path):
         while not line.startswith(" *(.data*)"):
             items = re.sub(
                 " +", " ", line.strip()).split("(")[0].split(" ")
-            if len(items) != 2:
+            if len(items) != 2 or items[1].startswith("?"):
                 line = f.readline()
                 continue
 
@@ -173,7 +173,7 @@ def parse_sect_map(file_path):
         while not line.startswith(" *(.bss*)"):
             items = re.sub(
                 " +", " ", line.strip()).split(" ")
-            if len(items) != 2:
+            if len(items) != 2 or items[1].startswith("?"):
                 line = f.readline()
                 continue
 
