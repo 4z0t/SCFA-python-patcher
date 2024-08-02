@@ -199,7 +199,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     paths = find_patch_files(f"{target_path}/section/")
 
     files_contents = read_files_contents(f"{target_path}/section/", paths)
-    files_contents, address_names = preprocess_lines(files_contents)
+    # files_contents, address_names = preprocess_lines(files_contents)
 
     with open(f"{target_path}/section/main.cpp", "w") as main_file:
         main_file.writelines(files_contents)
@@ -219,7 +219,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
         raise Exception("Errors occured during building of cxx files")
 
     create_sections_file(f"{target_path}/section.ld",
-                         address_names | function_addresses | cxx_address_names)
+                         function_addresses | cxx_address_names)
     print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
     if (os.system(
             f"cd {target_path}/build & {hooks_compiler} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp")):
