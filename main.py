@@ -7,14 +7,22 @@ import re
 from typing import Optional
 import struct
 
-FLAGS = " ".join(["-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=sse",
-                  "-fseh-exceptions",
-                  "-stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0",
-                  "-I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32",
-                  "-L C:\msys64\mingw32\lib",
-                  "-L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32/13.1.0"])
+FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
+                  #   "-stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0",
+                  #   "-I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32",
+                  #   "-L C:\msys64\mingw32\lib",
+                  #   "-L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32/13.1.0"
+                  ])
 
-HOOKS_FLAGS = " ".join(["-pipe -m32 -Os -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=sse",
+PRE_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -nostartfiles -w -masm=intel -std=c++20 -march=core2 -c",
+                      #   "-fseh-exceptions",
+                      #   "-stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0",
+                      #   "-I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32",
+                      #   "-L C:\msys64\mingw32\lib",
+                      #   "-L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32/13.1.0"
+                      ])
+
+HOOKS_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
                         ])
 SECT_SIZE = 0x80000
 
@@ -110,6 +118,9 @@ __ZdlPvj = 0x958C40;
             *(.CRT*)
             _END_CTOR = .;
         }
+        .clang : {
+            clangfile.o
+        }
         /DISCARD/ : {
             *(.rdata$zzz)
             *(.eh_frame*)
@@ -137,7 +148,7 @@ def parse_sect_map(file_path):
     addresses = {}
     with open(file_path, "r") as f:
         line = f.readline()
-        while not line.startswith(" .text"):
+        while not line.startswith(" *(.text*)"):
             line = f.readline()
 
         line = f.readline()
@@ -145,7 +156,8 @@ def parse_sect_map(file_path):
             items = re.sub(
                 " +", " ", line.strip()).split("(")[0].split(" ")
             if len(items) != 2:
-                break
+                line = f.readline()
+                continue
 
             address, name = re.sub(
                 " +", " ", line.strip()).split("(")[0].split(" ")
@@ -195,20 +207,25 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     function_addresses = {
         name: name for name in scan_header_files(target_path)}
 
-    # create_cxx_sections_file(
-    #     f"{target_path}/cxxsection.ld", function_addresses)
+    cxx_files_contents = read_files_contents(
+        f"{target_path}/section/", list_files_at(f"{target_path}/section/", "**/*.cxx", ["main.cxx"]))
+    cxx_files_contents, cxx_address_names = preprocess_lines(
+        cxx_files_contents)
 
-    # if (os.system(f"cd {target_path}/build & {compiler_path} {PRE_FLAGS} ../section/*.cxx -o clangfiles.o")):
-    #     raise Exception("Errors occured during building of cxx files")
+    with open(f"{target_path}/section/main.cxx", "w") as main_file:
+        main_file.writelines(cxx_files_contents)
+
+    if (os.system(f"cd {target_path}/build & {compiler_path} {PRE_FLAGS} ../section/main.cxx -o clangfile.o")):
+        raise Exception("Errors occured during building of cxx files")
 
     create_sections_file(f"{target_path}/section.ld",
-                         address_names | function_addresses)
+                         address_names | function_addresses | cxx_address_names)
     print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
     if (os.system(
-            f"cd {target_path}/build & {compiler_path} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp")):
+            f"cd {target_path}/build & {hooks_compiler} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp")):
         raise Exception("Errors occured during building of patch files")
 
-    remove_files_at(f"{target_path}/build", "**/.o")
+    remove_files_at(f"{target_path}/build", "**/*.o")
 
     addresses = parse_sect_map(f"{target_path}/sectmap.txt")
     print(addresses)
@@ -259,8 +276,9 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
                         "  /DISCARD/ : {\n    *(.text)\n    *(.text.startup)\n",
                         "    *(.rdata$zzz)\n    *(.eh_frame)\n    *(.ctors)\n    *(.reloc)\n  }\n}"
                         ])
-    print(os.system(
-        f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"))
+    if (os.system(
+            f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt")):
+        raise Exception("Errors occured during linking")
 
     base_file_data = base_pe.data
 

@@ -78,7 +78,10 @@ class COFFData(BasicBinaryParser):
             try:
                 name: str = name.decode().replace("\x00", "")
             except UnicodeDecodeError:
-                name = ""
+                name = "0"
+            if name[0] != "h":
+                self.pos += 0x20
+                continue
             sect = self.find_sect(name)
             if sect is not None:
                 self.pos += 8
