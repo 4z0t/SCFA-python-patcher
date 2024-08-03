@@ -390,7 +390,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
 
 if __name__ == "__main__":
     main(*sys.argv)
-    
+
     # from  itertools import pairwise
     # def test(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     #     sig_patches = []
@@ -401,12 +401,12 @@ if __name__ == "__main__":
     #                 continue
 
     #             sig_patches.append(line.replace(" ", "").replace("\n", ""))
-        
+
     #     sig_patches = pairwise(sig_patches)
     #     for pattern, replacement in sig_patches:
     #         for i in range(0,len(pattern),2):
     #             item = pattern[i:i+2:]
-    #             # if 
-                
+    #             # if
+
     #     print(list(sig_patches))
     # test(*sys.argv)
