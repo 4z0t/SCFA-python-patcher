@@ -263,7 +263,6 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
             for name, address in addresses.items():
                 f.write(f"#define {name} {address}\n")
     create_defines_file(f"{target_path}/define.h", addresses)
-    print(addresses)
 
     if (os.system(f"cd {target_path}/build & {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp")):
         raise Exception("Errors occured during building of hooks files")
@@ -284,7 +283,6 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     section_pe = PEData(f"{target_path}/build/section.pe")
     ssize = section_pe.sects[-1].v_offset + \
         section_pe.sects[-1].v_size + section_pe.sects[0].v_offset
-    print(ssize)
 
     with open(f"{target_path}/patch.ld", "w") as pld:
         pld.writelines(["OUTPUT_FORMAT(pei-i386)\n",
@@ -326,6 +324,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     for hook in hooks:
         if len(hook.sects) == 0:
             print(f"No hooks in {hook.name}")
+            continue
         for sect in hook.sects:
             psect = patch_pe.find_sect(f".h{hi}")
             size = sect.size

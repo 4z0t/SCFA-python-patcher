@@ -96,8 +96,6 @@ class COFFData(BasicBinaryParser):
         with open(file_path, "wb") as f:
             f.write(data)
 
-        print(self.sects)
-
     def find_sect(self, name: str) -> Optional[COFFSect]:
         for sect in self.sects:
             if sect.name == name:
