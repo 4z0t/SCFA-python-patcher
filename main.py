@@ -8,18 +8,9 @@ from typing import Optional
 import struct
 
 FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
-                  #   "-stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0",
-                  #   "-I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32",
-                  #   "-L C:\msys64\mingw32\lib",
-                  #   "-L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32/13.1.0"
                   ])
 
 PRE_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -nostartfiles -w -masm=intel -std=c++20 -march=core2 -c",
-                      #   "-fseh-exceptions",
-                      #   "-stdlib++-isystem C:/msys64/mingw64/include/c++/13.2.0",
-                      #   "-I C:/msys64/mingw64/include/c++/13.2.0/x86_64-w64-mingw32",
-                      #   "-L C:\msys64\mingw32\lib",
-                      #   "-L C:\msys64\mingw32\lib\gcc\i686-w64-mingw32/13.1.0"
                       ])
 
 HOOKS_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
@@ -367,6 +358,16 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
         replace_data(section_pe.data[s.f_offset:s.f_offset+s.f_size],
                      nsect.f_offset+s.v_offset-section_pe.sects[0].v_offset)
 
+    # sig_patches = []
+    # with open(f"{target_path}/SigPatches.txt", "r") as sig_f:
+
+    #     for line in sig_f.readlines():
+    #         if line.startswith("//") or line in ("", "\n"):
+    #             continue
+    #         sig_patches.append(line.replace(" ", "").replace("\n", ""))
+
+    # print(sig_patches)
+
     def save_new_base_data(data):
         with open(f"{target_path}/ForgedAlliance_exxt.exe", "wb") as nf:
             sect_count = len(base_pe.sects)
@@ -383,13 +384,29 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
                 nf.write(sect.to_bytes())
 
     save_new_base_data(base_file_data)
+
     remove_files_at(f"{target_path}/build", "**/*.o")
 
 
 if __name__ == "__main__":
     main(*sys.argv)
-    # FILE_PATH = "F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\ForgedAlliance_base.exe"
-    # pe = PEData(FILE_PATH)
-    # print(pe.sects)
-    # coff = COFFData(
-    #     r"F:\GIT\SCFA-python-patcher\FA-Binary-Patches-SIMPLE\build\SetStatFix.o")
+    
+    # from  itertools import pairwise
+    # def test(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
+    #     sig_patches = []
+    #     with open(f"{target_path}/SigPatches.txt", "r") as sig_f:
+
+    #         for line in sig_f.readlines():
+    #             if line.startswith("//") or line in ("", "\n"):
+    #                 continue
+
+    #             sig_patches.append(line.replace(" ", "").replace("\n", ""))
+        
+    #     sig_patches = pairwise(sig_patches)
+    #     for pattern, replacement in sig_patches:
+    #         for i in range(0,len(pattern),2):
+    #             item = pattern[i:i+2:]
+    #             # if 
+                
+    #     print(list(sig_patches))
+    # test(*sys.argv)
