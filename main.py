@@ -315,12 +315,11 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
             f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt")):
         raise Exception("Errors occured during linking")
 
-    base_file_data = base_pe.data
+    base_file_data = bytearray(base_pe.data)
 
     def replace_data(new_data, offset):
         nonlocal base_file_data
-        base_file_data = base_file_data[:offset] + \
-            new_data + base_file_data[offset+len(new_data):]
+        base_file_data[offset:offset+len(new_data)] = new_data
 
     patch_pe = PEData(f"{target_path}/build/patch.pe")
     hi = 0
