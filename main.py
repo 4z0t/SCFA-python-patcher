@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 from typing import Optional
 import struct
+import time
 
 FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
                   ])
@@ -387,7 +388,10 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
 
 
 if __name__ == "__main__":
+    start = time.time()
     main(*sys.argv)
+    end = time.time()
+    print(f"Patched in {end-start:.2f}s")
 
     # from  itertools import pairwise
     # def test(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
