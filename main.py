@@ -323,14 +323,14 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
         main_file.writelines(cxx_files_contents)
 
     if os.system(f"cd {target_path}/build & {compiler_path} {PRE_FLAGS} ../section/main.cxx -o clangfile.o"):
-        raise Exception("Errors occured during building of cxx files")
+        raise Exception("Errors occurred during building of cxx files")
 
     create_sections_file(f"{target_path}/section.ld",
                          function_addresses | cxx_address_names)
     print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
     if os.system(
             f"cd {target_path}/build & {hooks_compiler} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"):
-        raise Exception("Errors occured during building of patch files")
+        raise Exception("Errors occurred during building of patch files")
 
     remove_files_at(f"{target_path}/build", "**/*.o")
 
@@ -347,7 +347,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     create_defines_file(f"{target_path}/define.h", addresses)
 
     if os.system(f"cd {target_path}/build & {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp"):
-        raise Exception("Errors occured during building of hooks files")
+        raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
     for path in list_files_at(f"{target_path}/build", "**/*.o"):
@@ -405,7 +405,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
         ])
     if os.system(
             f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"):
-        raise Exception("Errors occured during linking")
+        raise Exception("Errors occurred during linking")
 
     base_file_data = bytearray(base_pe.data)
 
