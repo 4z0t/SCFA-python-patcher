@@ -1,1 +1,0 @@
-C:\ProgramData\FAForever\bin\FAFDebugger.exe C:\ProgramData\FAForever\bin\ForgedAlliance_exxt.exe /init init-dev.lua /nobugreport /log C:\ProgramData\FAForever\bin\logs\game.log /EnableDiskWatch /showlog
