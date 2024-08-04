@@ -473,15 +473,11 @@ if __name__ == "__main__":
                 start_location += len(first_bytes)
         for sig, replacement in bin_sigs:
             print(sig)
-            num_patched = 0
-            locations = []
-            for pos in yield_sig_locations(data, sig):
-                num_patched += 1
-                locations.append(pos)
-
+            locations = [pos for pos in yield_sig_locations(data, sig)]
             for pos in locations:
                 data[pos:pos+len(replacement)] = replacement
-            print(f" patched {num_patched} times")
+
+            print(f" patched {len(locations)} times")
 
         with open(f"{target_path}/ForgedAlliance_exxt.exe", "wb") as f:
             f.write(data)
