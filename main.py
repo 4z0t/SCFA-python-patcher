@@ -57,7 +57,7 @@ def read_files_contents(dir_path: str, paths: list[str]) -> list[str]:
     return files_contents
 
 
-def preprocess_lines(lines: list[str]):
+def preprocess_lines(lines: list[str]) -> tuple[list[str], dict[str, str]]:
     new_lines = []
     address_names = {}
     for line in lines:
@@ -322,14 +322,14 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     with open(f"{target_path}/section/main.cxx", "w") as main_file:
         main_file.writelines(cxx_files_contents)
 
-    if (os.system(f"cd {target_path}/build & {compiler_path} {PRE_FLAGS} ../section/main.cxx -o clangfile.o")):
+    if os.system(f"cd {target_path}/build & {compiler_path} {PRE_FLAGS} ../section/main.cxx -o clangfile.o"):
         raise Exception("Errors occured during building of cxx files")
 
     create_sections_file(f"{target_path}/section.ld",
                          function_addresses | cxx_address_names)
     print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
-    if (os.system(
-            f"cd {target_path}/build & {hooks_compiler} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp")):
+    if os.system(
+            f"cd {target_path}/build & {hooks_compiler} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"):
         raise Exception("Errors occured during building of patch files")
 
     remove_files_at(f"{target_path}/build", "**/*.o")
@@ -346,7 +346,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
                 f.write(f"#define {name} {address}\n")
     create_defines_file(f"{target_path}/define.h", addresses)
 
-    if (os.system(f"cd {target_path}/build & {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp")):
+    if os.system(f"cd {target_path}/build & {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp"):
         raise Exception("Errors occured during building of hooks files")
 
     hooks: list[COFFData] = []
@@ -403,8 +403,8 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
             "  }\n",
             "}"
         ])
-    if (os.system(
-            f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt")):
+    if os.system(
+            f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"):
         raise Exception("Errors occured during linking")
 
     base_file_data = bytearray(base_pe.data)
