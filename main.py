@@ -19,7 +19,7 @@ HOOKS_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles 
 SECT_SIZE = 0x80000
 
 
-def scan_header_files(target_path: str):
+def scan_header_files(target_path: str) -> list[str]:
     functions_addresses = []
     contents = read_files_contents(
         f"{target_path}/section/include/",
@@ -33,7 +33,7 @@ def scan_header_files(target_path: str):
     return functions_addresses
 
 
-def list_files_at(folder: str, pattern: str, excluded: Optional[list[str]] = None):
+def list_files_at(folder: str, pattern: str, excluded: Optional[list[str]] = None) -> list[str]:
     dir_path = Path(folder)
     pathlist = dir_path.glob(pattern)
 
@@ -43,11 +43,11 @@ def list_files_at(folder: str, pattern: str, excluded: Optional[list[str]] = Non
     return paths
 
 
-def find_patch_files(dir_path_s: str):
+def find_patch_files(dir_path_s: str) -> list[str]:
     return list_files_at(dir_path_s, "**/*.cpp", ["main.cpp"])
 
 
-def read_files_contents(dir_path, paths):
+def read_files_contents(dir_path: str, paths: list[str]) -> list[str]:
     files_contents = []
     for path in paths:
         with open(dir_path + path, "r")as f:
@@ -79,7 +79,7 @@ def preprocess_lines(lines: list[str]):
     return new_lines, address_names
 
 
-def create_sections_file(path, address_map):
+def create_sections_file(path: str, address_map: dict[str, str]):
 
     HEADER = """
 OUTPUT_FORMAT(pei-i386)
@@ -136,7 +136,7 @@ def create_cxx_sections_file(path, address_map):
             f.write(f"\"{name}\" = {address};\n")
 
 
-def parse_sect_map(file_path):
+def parse_sect_map(file_path: str) -> dict[str, str]:
     addresses = {}
     with open(file_path, "r") as f:
         line = f.readline()
@@ -199,14 +199,14 @@ def parse_sect_map(file_path):
     return addresses
 
 
-def remove_files_at(folder, pattern):
+def remove_files_at(folder: str, pattern: str):
     dir_path = Path(folder)
     pathlist = dir_path.glob(pattern)
     for p in pathlist:
         p.unlink()
 
 
-def apply_sig_patches(file_path, data: bytearray):
+def apply_sig_patches(file_path: str, data: bytearray):
     sig_patches = []
     with open(file_path, "r") as sig_f:
 
@@ -452,10 +452,10 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
 
     apply_sig_patches(f"{target_path}/SigPatches.txt", base_file_data)
 
-    def save_new_base_data(data):
+    def save_new_base_data(data: bytearray):
         with open(f"{target_path}/ForgedAlliance_exxt.exe", "wb") as nf:
             sect_count = len(base_pe.sects)
-            nf.write(base_file_data)
+            nf.write(data)
             nf.seek(base_pe.offset+0x6)
             nf.write(struct.pack("H", sect_count))
             img_size = base_pe.sects[-1].v_offset + base_pe.sects[-1].v_size
