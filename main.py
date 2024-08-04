@@ -367,9 +367,10 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
         section_pe.sects[-1].v_size + section_pe.sects[0].v_offset
 
     with open(f"{target_path}/patch.ld", "w") as pld:
-        pld.writelines(["OUTPUT_FORMAT(pei-i386)\n",
-                        "OUTPUT(build/patch.pe)\n",
-                        ])
+        pld.writelines([
+            "OUTPUT_FORMAT(pei-i386)\n",
+            "OUTPUT(build/patch.pe)\n",
+        ])
 
         for name, address in addresses.items():
             pld.write(f"\"{name}\" = {address};\n")
@@ -385,22 +386,23 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
                     " }\n",
                 ])
                 hi += 1
-        pld.writelines([f"  .exxt 0x{base_pe.imgbase + new_v_offset:x}: {{\n",
-                        f"  . = . + {ssize};\n",
-                        "    *(.data)\n",
-                        "    *(.bss)\n",
-                        "    *(.rdata)\n",
-                        "  }\n",
-                        "  /DISCARD/ : {\n",
-                        "    *(.text)\n",
-                        "    *(.text.startup)\n",
-                        "    *(.rdata$zzz)\n",
-                        "    *(.eh_frame)\n",
-                        "    *(.ctors)\n",
-                        "    *(.reloc)\n",
-                        "  }\n",
-                        "}"
-                        ])
+        pld.writelines([
+            f"  .exxt 0x{base_pe.imgbase + new_v_offset:x}: {{\n",
+            f"  . = . + {ssize};\n",
+            "    *(.data)\n",
+            "    *(.bss)\n",
+            "    *(.rdata)\n",
+            "  }\n",
+            "  /DISCARD/ : {\n",
+            "    *(.text)\n",
+            "    *(.text.startup)\n",
+            "    *(.rdata$zzz)\n",
+            "    *(.eh_frame)\n",
+            "    *(.ctors)\n",
+            "    *(.reloc)\n",
+            "  }\n",
+            "}"
+        ])
     if (os.system(
             f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt")):
         raise Exception("Errors occured during linking")
