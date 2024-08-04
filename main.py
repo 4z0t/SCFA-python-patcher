@@ -387,9 +387,19 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
                 hi += 1
         pld.writelines([f"  .exxt 0x{base_pe.imgbase + new_v_offset:x}: {{\n",
                         f"  . = . + {ssize};\n",
-                        "    *(.data)\n    *(.bss)\n    *(.rdata)\n  }\n",
-                        "  /DISCARD/ : {\n    *(.text)\n    *(.text.startup)\n",
-                        "    *(.rdata$zzz)\n    *(.eh_frame)\n    *(.ctors)\n    *(.reloc)\n  }\n}"
+                        "    *(.data)\n",
+                        "    *(.bss)\n",
+                        "    *(.rdata)\n",
+                        "  }\n",
+                        "  /DISCARD/ : {\n",
+                        "    *(.text)\n",
+                        "    *(.text.startup)\n",
+                        "    *(.rdata$zzz)\n",
+                        "    *(.eh_frame)\n",
+                        "    *(.ctors)\n",
+                        "    *(.reloc)\n",
+                        "  }\n",
+                        "}"
                         ])
     if (os.system(
             f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt")):
