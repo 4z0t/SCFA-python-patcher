@@ -24,3 +24,5 @@ ld linker:
 g++ compiler:
 * g++ (Rev6, Built by MSYS2 project) 13.1.0
 
+python:
+* 3.12.4
