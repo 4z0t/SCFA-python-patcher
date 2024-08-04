@@ -388,27 +388,102 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
 
 
 if __name__ == "__main__":
-    start = time.time()
-    main(*sys.argv)
-    end = time.time()
-    print(f"Patched in {end-start:.2f}s")
+    # start = time.time()
+    # main(*sys.argv)
+    # end = time.time()
+    # print(f"Patched in {end-start:.2f}s")
 
-    # from  itertools import pairwise
-    # def test(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
-    #     sig_patches = []
-    #     with open(f"{target_path}/SigPatches.txt", "r") as sig_f:
+    from itertools import pairwise
 
-    #         for line in sig_f.readlines():
-    #             if line.startswith("//") or line in ("", "\n"):
-    #                 continue
+    def test(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
+        sig_patches = []
+        with open(f"{target_path}/SigPatches.txt", "r") as sig_f:
 
-    #             sig_patches.append(line.replace(" ", "").replace("\n", ""))
+            for line in sig_f.readlines():
+                if line.startswith("//") or line in ("", "\n"):
+                    continue
 
-    #     sig_patches = pairwise(sig_patches)
-    #     for pattern, replacement in sig_patches:
-    #         for i in range(0,len(pattern),2):
-    #             item = pattern[i:i+2:]
-    #             # if
+                sig_patches.append(line.replace(" ", "").replace("\n", ""))
+        signatures = []
+        for i in range(0, len(sig_patches), 2):
+            pattern = sig_patches[i]
+            replacement = sig_patches[i+1]
+            if len(pattern) < len(replacement):
+                raise Exception(
+                    f"Replacement sig patch must be shorter than pattern: {pattern} and {replacement}")
 
-    #     print(list(sig_patches))
-    # test(*sys.argv)
+            signature = []
+            any_len = 0
+            seq = ""
+            for i in range(0, len(pattern), 2):
+                item = pattern[i:i+2:]
+                if item == "??":
+                    if len(seq) != 0:
+                        signature.append(seq)
+                        seq = ""
+                    any_len += 1
+
+                else:
+                    if any_len != 0:
+                        signature.append(any_len)
+                        any_len = 0
+                    seq += item
+            if len(seq) != 0:
+                signature.append(seq)
+            elif any_len != 0:
+                signature.append(any_len)
+            signatures.append((signature, replacement))
+        print(signatures)
+
+        bin_sigs = []
+        for sig, replacement in signatures:
+            bin_sig = []
+            for item in sig:
+                if isinstance(item, str):
+                    bin_sig.append(bytes.fromhex(item))
+                else:
+                    bin_sig.append(item)
+            bin_sigs.append((bin_sig, bytes.fromhex(replacement)))
+        print(bin_sigs)
+
+        data = b""
+        with open(f"{target_path}/ForgedAlliance_exxt.exe", "rb") as f:
+            data = bytearray(f.read())
+
+        def yield_sig_locations(data: bytearray, sig: list[bytes | int]):
+            start_location = 0
+            first_bytes, *tail = sig
+            while start_location != -1:
+                start_location = data.find(first_bytes, start_location)
+                if start_location == -1:
+                    break
+                search_location = start_location + len(first_bytes)
+
+                for item in tail:
+                    if isinstance(item, bytes):
+                        if data[search_location:search_location+len(item)] != item:
+                            break
+                        search_location += len(item)
+                    else:
+                        search_location += item
+                else:
+                    yield start_location
+                    start_location = search_location
+                    continue
+                start_location += len(first_bytes)
+        for sig, replacement in bin_sigs:
+            print(sig)
+            num_patched = 0
+            locations = []
+            for pos in yield_sig_locations(data, sig):
+                num_patched += 1
+                locations.append(pos)
+
+            for pos in locations:
+                data[pos:pos+len(replacement)] = replacement
+            print(f" patched {num_patched} times")
+
+        with open(f"{target_path}/ForgedAlliance_exxt.exe", "wb") as f:
+            f.write(data)
+
+    test(*sys.argv)
