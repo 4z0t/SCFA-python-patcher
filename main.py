@@ -300,14 +300,17 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
 
     new_v_offset = align(new_v_offset, base_pe.sectalign)
     new_f_offset = align(new_f_offset, base_pe.filealign)
+    print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
 
     paths = find_patch_files(f"{target_path}/section/")
 
-    files_contents = read_files_contents(f"{target_path}/section/", paths)
+    # files_contents = read_files_contents(f"{target_path}/section/", paths)
     # files_contents, address_names = preprocess_lines(files_contents)
 
     with open(f"{target_path}/section/main.cpp", "w") as main_file:
-        main_file.writelines(files_contents)
+        for path in paths:
+            main_file.writelines(f"#include \"{path}\"\n")
+        # main_file.writelines(files_contents)
 
     function_addresses = {
         name: name for name in scan_header_files(target_path)}
@@ -325,7 +328,6 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
 
     create_sections_file(f"{target_path}/section.ld",
                          function_addresses | cxx_address_names)
-    print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
     if os.system(
             f"cd {target_path}/build & {hooks_compiler} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"):
         raise Exception("Errors occurred during building of patch files")
