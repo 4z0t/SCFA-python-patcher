@@ -22,8 +22,8 @@ SECT_SIZE = 0x80000
 def scan_header_files(target_path: str) -> list[str]:
     functions_addresses = []
     contents = read_files_contents(
-        f"{target_path}/section/include/",
-        list_files_at(f"{target_path}/section/include/", "**/*.h"))
+        f"{target_path}/include/",
+        list_files_at(f"{target_path}/include/", "**/*.h"))
 
     for line in contents:
         matches = re.finditer(
@@ -36,8 +36,8 @@ def scan_header_files(target_path: str) -> list[str]:
 def list_files_at(folder: str, pattern: str, excluded: Optional[list[str]] = None) -> list[str]:
     dir_path = Path(folder)
     pathlist = dir_path.glob(pattern)
+    paths = [str(path.relative_to(dir_path)) for path in pathlist]
 
-    paths = [path.name for path in pathlist]
     if excluded is not None:
         paths = [path for path in paths if path not in excluded]
     return paths
@@ -323,13 +323,13 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     with open(f"{target_path}/section/main.cxx", "w") as main_file:
         main_file.writelines(cxx_files_contents)
 
-    if os.system(f"cd {target_path}/build & {compiler_path} {PRE_FLAGS} ../section/main.cxx -o clangfile.o"):
+    if os.system(f"cd {target_path}/build & {compiler_path} {PRE_FLAGS} -I ../include/ ../section/main.cxx -o clangfile.o"):
         raise Exception("Errors occurred during building of cxx files")
 
     create_sections_file(f"{target_path}/section.ld",
                          function_addresses | cxx_address_names)
     if os.system(
-            f"cd {target_path}/build & {hooks_compiler} {FLAGS} -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"):
+            f"cd {target_path}/build & {hooks_compiler} {FLAGS} -I ../include/ -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"):
         raise Exception("Errors occurred during building of patch files")
 
     remove_files_at(f"{target_path}/build", "**/*.o")
