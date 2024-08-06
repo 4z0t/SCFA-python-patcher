@@ -329,12 +329,12 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     create_sections_file(f"{target_path}/section.ld",
                          function_addresses | cxx_address_names)
     if os.system(
-            f"cd {target_path}/build & {hooks_compiler} {FLAGS} -I ../include/ -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,../sectmap.txt,-o,section.pe ../section/main.cpp"):
+            f"cd {target_path}/build & {hooks_compiler} {FLAGS} -I ../include/ -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,sectmap.txt,-o,section.pe ../section/main.cpp"):
         raise Exception("Errors occurred during building of patch files")
 
     remove_files_at(f"{target_path}/build", "**/*.o")
 
-    addresses = parse_sect_map(f"{target_path}/sectmap.txt")
+    addresses = parse_sect_map(f"{target_path}/build/sectmap.txt")
 
     def create_defines_file(path, addresses):
         with open(path, "w") as f:
