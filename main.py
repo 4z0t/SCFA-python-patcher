@@ -22,8 +22,7 @@ SECT_SIZE = 0x80000
 def scan_header_files(target_path: str) -> list[str]:
     functions_addresses = []
     contents = read_files_contents(
-        f"{target_path}/include/",
-        list_files_at(f"{target_path}/include/", "**/*.h"))
+        target_path, list_files_at(target_path, "**/*.h"))
 
     for line in contents:
         matches = re.finditer(
@@ -50,7 +49,7 @@ def find_patch_files(dir_path_s: str) -> list[str]:
 def read_files_contents(dir_path: str, paths: list[str]) -> list[str]:
     files_contents = []
     for path in paths:
-        with open(dir_path + path, "r")as f:
+        with open(Path(dir_path) / path, "r")as f:
             files_contents.extend(f.readlines())
             files_contents.append("\n")
 
@@ -285,6 +284,18 @@ def apply_sig_patches(file_path: str, data: bytearray):
         i += 2
 
 
+def scan_for_headers_in_section(sections_path):
+
+    paths = [Path(s) for s in list_files_at(sections_path, "**/*.h")]
+    folders = {str(path.parent) for path in paths}
+    return folders
+
+
+def run_system(command: str) -> int:
+    print(command)
+    return os.system(command.replace("\n", " "))
+
+
 def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
 
     base_pe = PEData(f"{target_path}/ForgedAlliance_base.exe")
@@ -323,13 +334,24 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     with open(f"{target_path}/section/main.cxx", "w") as main_file:
         main_file.writelines(cxx_files_contents)
 
-    if os.system(f"cd {target_path}/build & {compiler_path} {PRE_FLAGS} -I ../include/ ../section/main.cxx -o clangfile.o"):
+    folders = scan_for_headers_in_section(f"{target_path}/section")
+    includes = " ".join([f"-I ../section/{folder}/" for folder in folders])
+
+    if run_system(
+            f"""cd {target_path}/build &
+            {compiler_path} {PRE_FLAGS}
+            -I ../include/ {includes}
+            ../section/main.cxx -o clangfile.o"""):
         raise Exception("Errors occurred during building of cxx files")
 
     create_sections_file(f"{target_path}/section.ld",
                          function_addresses | cxx_address_names)
-    if os.system(
-            f"cd {target_path}/build & {hooks_compiler} {FLAGS} -I ../include/ -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,sectmap.txt,-o,section.pe ../section/main.cpp"):
+    if run_system(
+            f"""cd {target_path}/build &
+            {hooks_compiler} {FLAGS}
+            -I ../include/ {includes}
+            -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,sectmap.txt,-o,section.pe
+            ../section/main.cpp"""):
         raise Exception("Errors occurred during building of patch files")
 
     remove_files_at(f"{target_path}/build", "**/*.o")
@@ -346,7 +368,9 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
                 f.write(f"#define {name} {address}\n")
     create_defines_file(f"{target_path}/define.h", addresses)
 
-    if os.system(f"cd {target_path}/build & {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp"):
+    if run_system(
+            f"""cd {target_path}/build &
+            {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp"""):
         raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
@@ -403,8 +427,9 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
             "  }\n",
             "}"
         ])
-    if os.system(
-            f"cd {target_path} & {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"):
+    if run_system(
+            f"""cd {target_path} &
+            {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"""):
         raise Exception("Errors occurred during linking")
 
     base_file_data = bytearray(base_pe.data)
