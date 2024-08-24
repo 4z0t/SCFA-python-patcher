@@ -17,6 +17,7 @@ To apply patcher on patch files run this command:
   - `*.cpp` files are built with *g++*
   - `*.cxx` files are built with *clang++*
   - Can contain nested folders
+  - Can contain header files
 - **/hooks**: All files with asm that is injected by specified addresses. 
 - ***define.h***: Generated file for hooks to use.
 - ***SigPatches.txt***: File with signature patches. Replaces one binary sequence with another. Applied after build.
