@@ -16,62 +16,90 @@ REGISTERS_32 = {
 }
 
 
-FUNC_R = r"^([a-zA-Z0-9\:_]+\*?\s+\*?)\s+__user(call|purge)\s+([a-zA-Z0-9\:_]+)(@<([a-z0-9]+)>)?\((.+)\)$"
+FUNC_R = r"^([a-zA-Z0-9\:_]+\*?\s+\*?)\s*__user(call|purge)\s+([a-zA-Z0-9\:_]+)(@<([a-z0-9]+)>)?\((.+)\)$"
 
 FUNC_ARGS = re.compile(
-    r"((([a-zA-Z0-9\:_]+\*?\s+\*?)([a-zA-Z0-9_]+)(@<([a-z0-9]+)>)?)(\,\s+|\)))")
+    r"((([a-zA-Z0-9\:_]+\*?\s+\*?)([a-zA-Z0-9_]+)(@<([a-z0-9]+)>)?)(\,\s+)?)")
+
+
+def check_register(reg: str):
+    if reg != "" and reg not in REGISTERS_32:
+        raise Exception(f"unknown register {reg}")
 
 
 class Arg:
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, arg_data) -> None:
+        self.type: str = arg_data[2].replace(" ", "")
+        self.name: str = arg_data[3]
+        self.register: str = arg_data[5]
+
+        check_register(self.register)
 
 
 class Function:
 
-    def __init__(self) -> None:
+    def __init__(self, s) -> None:
+        match = re.match(FUNC_R, s)
+        if match is None:
+            raise Exception("Invalid input string")
+        groups = match.groups()
+        self.type: str = groups[0].replace(" ", "")
+        self.need_stack_clear: bool = groups[1] == "call"
+        self.name: str = groups[2]
+        self.register: str = groups[4]
 
-        pass
+        check_register(self.register)
+
+        args = groups[5]
+        self.args: list[Arg] = [Arg(arg) for arg in FUNC_ARGS.findall(args)]
+
+    def convert_args(self) -> str:
+        return ", ".join([f"{arg.type} {arg.name}" for arg in self.args])
+
+    def make_output(self) -> str:
+        if self.type == "void":
+            return ""
+        if self.register == "":
+            raise Exception("Return register must be specified")
+        return f"\"={REGISTERS_32[self.register]}\" (__result)"
+
+    def make_input(self) -> str:
+        return ", ".join([f"[{arg.name}] \"{REGISTERS_32[arg.register] if arg.register != "" else "g"}\" ({arg.name})" for arg in self.args])
+
+    def make_instructions(self) -> str:
+        instructions = []
+        for arg in self.args[::-1]:
+            if arg.register == "":
+                instructions.append(f"\"push %[{arg.name}];\"")
+        instructions.append("\"call ADDRESS;\"")
+        if self.need_stack_clear:
+            stack_args = len([arg for arg in self.args if arg.register == ""])
+            if stack_args != 0:
+                instructions.append(f"\"add esp, 0x{stack_args*4:x}\"")
+
+        return "\n".join(instructions)
+
+    def make_asm(self) -> str:
+        return f"asm(\n{self.make_instructions()}\n: {self.make_output()}\n: {self.make_input()}\n:\n);"
+
+    def make_header(self) -> str:
+        return f"{self.type} {self.name} ({self.convert_args()})"
+
+    def make_body(self) -> str:
+        if self.type == "void":
+            return f"{{\n{self.make_asm()}\n}}"
+
+        return f"{{\n{self.type} __result;\n{self.make_asm()}\nreturn __result;\n}}"
+
+    def convert(self) -> str:
+        return f"{self.make_header()}\n{self.make_body()}"
 
 
 def main(s: str):
-
-    match = re.match(FUNC_R, s)
-    if match is None:
-        raise Exception("Invalid input string")
-    # print(match)
-    groups = match.groups()
-    print(groups)
-    return_type = groups[0]
-    func_type = groups[1]
-    func_name = groups[2]
-    return_register = groups[4]
-    func_args = groups[5]
-
-    print(f"""
-          Return type: {return_type}
-          Func type: {func_type}
-          Name: {func_name}
-          Register: {return_register}
-          Args: {func_args}
-          """)
-
-    for arg in FUNC_ARGS.findall(func_args):
-
-        arg_type = arg[2]
-        arg_name = arg[3]
-        arg_register = arg[5]
-        print(f"""
-              Type: {arg_type}
-              Name: {arg_name}
-              Register: {arg_register}
-              """)
-    result = s
-
-    # print(result)
+    fn = Function(s)
+    print(fn.convert())
 
 
 if __name__ == "__main__":
-
-    main(sample)
+    main(input().strip())
