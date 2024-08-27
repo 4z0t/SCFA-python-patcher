@@ -5,6 +5,46 @@ import re
 
 sample = "int * __usercall Moho::UNIT_IssueCommand@<eax>(moho_set *a2@<edx>, int moho, Moho::SSTICommandIssueData *a4, char a5)"
 
+"""
+Converts usercall/purge functions from IDA preudo code into C ones made of GCC inline asm.
+Example:
+    input: char *__usercall Moho::DRAW_Rect@<eax>(
+                            Vector3f *vec1@<eax>,
+                            Vector3f *vec2@<ecx>,
+                            int color@<edi>,
+                            float thickness@<xmm0>,
+                            CD3DPrimBatcher *batcher,
+                            Vector3f *vec3,
+                            CHeightField *heightField,
+                            float a8)
+
+    output:  char* Moho::DRAW_Rect (
+                Vector3f* vec1,
+                Vector3f* vec2,
+                int color,
+                float thickness,
+                CD3DPrimBatcher* batcher,
+                Vector3f* vec3,
+                CHeightField* heightField,
+                float a8)
+            {
+            char* __result;
+            asm(
+                "push %[a8];"       
+                "push %[heightField];"
+                "push %[vec3];"
+                "push %[batcher];"
+                "movss xmm0, %[thickness];"
+                "call ADDRESS;"
+                "add esp, 0x10"
+                : "=a" (__result)
+                : [vec1] "a" (vec1), [vec2] "c" (vec2), [color] "D" (color), [thickness] "m" (thickness), [batcher] "g" (batcher), [vec3] "g" (vec3), [heightField] "g" (heightField), [a8] "g" (a8)
+                :"xmm0"
+            );
+            return __result;
+            }
+"""
+
 
 REGISTERS_32 = {
     "eax": "a",
