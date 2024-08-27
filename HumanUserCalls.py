@@ -15,6 +15,8 @@ REGISTERS_32 = {
     "edi": "D",
 }
 
+XMM_REGISTERS = {f"xmm{i}" for i in range(16)}
+
 
 FUNC_R = r"^([a-zA-Z0-9\:_]+\*?\s+\*?)\s*__user(call|purge)\s+([a-zA-Z0-9\:_]+)(@<([a-z0-9]+)>)?\((.+)\)$"
 
@@ -23,7 +25,7 @@ FUNC_ARGS = re.compile(
 
 
 def check_register(reg: str):
-    if reg != "" and reg not in REGISTERS_32:
+    if reg != "" and reg not in REGISTERS_32 and reg not in XMM_REGISTERS:
         raise Exception(f"unknown register {reg}")
 
 
@@ -35,6 +37,13 @@ class Arg:
         self.register: str = arg_data[5]
 
         check_register(self.register)
+
+    def get_constraint(self):
+        if self.register in REGISTERS_32:
+            return REGISTERS_32[self.register]
+        if self.register in XMM_REGISTERS:
+            return "m"
+        return "g"
 
 
 class Function:
@@ -65,13 +74,17 @@ class Function:
         return f"\"={REGISTERS_32[self.register]}\" (__result)"
 
     def make_input(self) -> str:
-        return ", ".join([f"[{arg.name}] \"{REGISTERS_32[arg.register] if arg.register != "" else "g"}\" ({arg.name})" for arg in self.args])
+        return ", ".join([f"[{arg.name}] \"{arg.get_constraint()}\" ({arg.name})" for arg in self.args])
 
     def make_instructions(self) -> str:
         instructions = []
         for arg in self.args[::-1]:
             if arg.register == "":
                 instructions.append(f"\"push %[{arg.name}];\"")
+            elif arg.register in XMM_REGISTERS:
+                instructions.append(
+                    f"\"movss {arg.register}, %[{arg.name}];\"")
+
         instructions.append("\"call ADDRESS;\"")
         if self.need_stack_clear:
             stack_args = len([arg for arg in self.args if arg.register == ""])
@@ -80,8 +93,11 @@ class Function:
 
         return "\n".join(instructions)
 
+    def make_changed_registers(self):
+        return ", ". join([f"\"{arg.register}\"" for arg in self.args if arg.register in XMM_REGISTERS])
+
     def make_asm(self) -> str:
-        return f"asm(\n{self.make_instructions()}\n: {self.make_output()}\n: {self.make_input()}\n:\n);"
+        return f"asm(\n{self.make_instructions()}\n: {self.make_output()}\n: {self.make_input()}\n: {self.make_changed_registers()}\n);"
 
     def make_header(self) -> str:
         return f"{self.type} {self.name} ({self.convert_args()})"
