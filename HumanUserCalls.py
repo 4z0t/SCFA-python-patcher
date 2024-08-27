@@ -36,7 +36,7 @@ Example:
                 "push %[batcher];"
                 "movss xmm0, %[thickness];"
                 "call ADDRESS;"
-                "add esp, 0x10"
+                "add esp, 0x10;"
                 : "=a" (__result)
                 : [vec1] "a" (vec1), [vec2] "c" (vec2), [color] "D" (color), [thickness] "m" (thickness), [batcher] "g" (batcher), [vec3] "g" (vec3), [heightField] "g" (heightField), [a8] "g" (a8)
                 :"xmm0"
@@ -129,7 +129,7 @@ class Function:
         if self.need_stack_clear:
             stack_args = len([arg for arg in self.args if arg.register == ""])
             if stack_args != 0:
-                instructions.append(f"\"add esp, 0x{stack_args*4:x}\"")
+                instructions.append(f"\"add esp, 0x{stack_args*4:x};\"")
 
         return "\n".join(instructions)
 
