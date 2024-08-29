@@ -3,10 +3,9 @@
 import re
 
 
-sample = "int * __usercall Moho::UNIT_IssueCommand@<eax>(moho_set *a2@<edx>, int moho, Moho::SSTICommandIssueData *a4, char a5)"
-
 """
-Converts usercall/purge functions from IDA preudo code into C ones made of GCC inline asm.
+Converts x86 usercall/purge functions from IDA pseudo code into C ones made of GCC inline asm.
+Still suggested to check generated code as well as performing additional changes for asm.
 Example:
     input: char *__usercall Moho::DRAW_Rect@<eax>(
                             Vector3f *vec1@<eax>,
