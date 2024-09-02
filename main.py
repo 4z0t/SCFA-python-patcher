@@ -18,6 +18,11 @@ HOOKS_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles 
                         ])
 SECT_SIZE = 0x80000
 
+ASM_RE = re.compile(r"(asm\(\"(0[xX][0-9a-fA-F]{1,8})\"\);)", re.IGNORECASE)
+CALL_RE = re.compile(
+    r"((call|jmp|je|jne)\s+(0[xX][0-9a-fA-F]{1,8}))", re.IGNORECASE)
+SPACES_RE = re.compile(" +")
+
 
 def scan_header_files(target_path: str) -> list[str]:
     functions_addresses = []
@@ -25,8 +30,7 @@ def scan_header_files(target_path: str) -> list[str]:
         target_path, list_files_at(target_path, "**/*.h"))
 
     for line in contents:
-        matches = re.finditer(
-            r"(asm\(\"(0[xX][0-9a-fA-F]{1,8})\"\);)", line, re.IGNORECASE)
+        matches = ASM_RE.finditer(line)
         for match in matches:
             functions_addresses.append(match.group(2))  # get address
     return functions_addresses
@@ -61,9 +65,7 @@ def preprocess_lines(lines: list[str]) -> tuple[list[str], dict[str, str]]:
     address_names = {}
     for line in lines:
 
-        matches = re.finditer(
-            r"((call|jmp|je|jne)\s+(0[xX][0-9a-fA-F]{1,8}))", line, re.IGNORECASE)
-
+        matches = CALL_RE.finditer(line)
         new_line = line
         for match in matches:
             full_s = match.group(0)
@@ -144,8 +146,7 @@ def parse_sect_map(file_path: str) -> dict[str, str]:
 
         line = f.readline()
         while not line.startswith(" *(.data*)"):
-            items = re.sub(
-                " +", " ", line.strip()).split("(")[0].split(" ")
+            items = SPACES_RE.sub(" ", line.strip()).split("(")[0].split(" ")
             if len(items) != 2 or items[1].startswith("?"):
                 line = f.readline()
                 continue
@@ -162,7 +163,7 @@ def parse_sect_map(file_path: str) -> dict[str, str]:
 
         line = f.readline()
         while not line.startswith(" *(.bss*)"):
-            items = re.sub(" +", " ", line.strip()).split(" ")
+            items = SPACES_RE.sub(" ", line.strip()).split(" ")
             if len(items) != 2 or items[1].startswith("?"):
                 line = f.readline()
                 continue
@@ -179,7 +180,7 @@ def parse_sect_map(file_path: str) -> dict[str, str]:
 
         line = f.readline()
         while not line.startswith(" *(.rdata)"):
-            items = re.sub(" +", " ", line.strip()).split(" ")
+            items = SPACES_RE.sub(" ", line.strip()).split(" ")
             if len(items) != 2 or items[1].startswith("?"):
                 line = f.readline()
                 continue
