@@ -7,6 +7,7 @@ import re
 from typing import Optional
 import struct
 import time
+import itertools
 
 FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
                   ])
@@ -26,8 +27,8 @@ SPACES_RE = re.compile(" +")
 
 def scan_header_files(target_path: str) -> list[str]:
     functions_addresses = []
-    contents = read_files_contents(
-        target_path, list_files_at(target_path, "**/*.h"))
+    contents = itertools.chain.from_iterable(read_files_contents(
+        target_path, list_files_at(target_path, "**/*.h")).values())
 
     for line in contents:
         matches = ASM_RE.finditer(line)
@@ -50,33 +51,41 @@ def find_patch_files(dir_path_s: str) -> list[str]:
     return list_files_at(dir_path_s, "**/*.cpp", ["main.cpp"])
 
 
-def read_files_contents(dir_path: str, paths: list[str]) -> list[str]:
-    files_contents = []
+def read_files_contents(dir_path: str, paths: list[str]) -> dict[str, list[str]]:
+    files_contents: dict[str, list[str]] = {}
     for path in paths:
+        files_contents[path] = []
+        file_contents = files_contents[path]
         with open(Path(dir_path) / path, "r")as f:
-            files_contents.extend(f.readlines())
-            files_contents.append("\n")
+            file_contents.extend(f.readlines())
+            file_contents.append("\n")
 
     return files_contents
 
 
-def preprocess_lines(lines: list[str]) -> tuple[list[str], dict[str, str]]:
+def preprocess_lines(files_contents: dict[str, list[str]]) -> tuple[list[str], dict[str, str]]:
     new_lines = []
     address_names = {}
-    for line in lines:
-
-        matches = CALL_RE.finditer(line)
-        new_line = line
-        for match in matches:
-            full_s = match.group(0)
-            address = match.group(3)
-            address_name = "_" + address[1::]
-            s_start, s_end = match.span()
-            address_names[address_name] = address
-            new_line = new_line[:s_start] + \
-                full_s.replace(address, address_name) + new_line[s_end:]
-
-        new_lines.append(new_line)
+    for file_name, contents in files_contents.items():
+        file_lines = []
+        file_addresses = {}
+        for line in contents:
+            matches = CALL_RE.finditer(line)
+            new_line = line
+            for match in matches:
+                full_s = match.group(0)
+                address = match.group(3)
+                address_name = "_" + address[1::]
+                s_start, s_end = match.span()
+                file_addresses[address_name] = address
+                new_line = new_line[:s_start] + \
+                    full_s.replace(address, address_name) + new_line[s_end:]
+            file_lines.append(new_line)
+        if len(file_addresses) == 0:
+            new_lines.append(f"#include \"{file_name}\"\n")
+        else:
+            new_lines.extend(file_lines)
+            address_names |= file_addresses
     return new_lines, address_names
 
 
@@ -336,7 +345,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
         main_file.writelines(cxx_files_contents)
 
     folders = scan_for_headers_in_section(f"{target_path}/section")
-    includes = " ".join([f"-I ../section/{folder}/" for folder in folders])
+    includes = " ".join((f"-I ../section/{folder}/" for folder in folders))
 
     if run_system(
             f"""cd {target_path}/build &
