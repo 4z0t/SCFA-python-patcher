@@ -37,18 +37,17 @@ def scan_header_files(target_path: str) -> list[str]:
     return functions_addresses
 
 
-def list_files_at(folder: str, pattern: str, excluded: Optional[list[str]] = None) -> list[str]:
-    dir_path = Path(folder)
-    pathlist = dir_path.glob(pattern)
-    paths = [str(path.relative_to(dir_path)) for path in pathlist]
+def list_files_at(folder: Path, pattern: str, excluded: Optional[list[str]] = None) -> list[str]:
+    pathlist = folder.glob(pattern)
+    paths = [str(path.relative_to(folder)) for path in pathlist]
 
     if excluded is not None:
         paths = [path for path in paths if path not in excluded]
     return paths
 
 
-def find_patch_files(dir_path_s: str) -> list[str]:
-    return list_files_at(dir_path_s, "**/*.cpp", ["main.cpp"])
+def find_patch_files(folder_path: Path) -> list[str]:
+    return list_files_at(folder_path, "**/*.cpp", ["main.cpp"])
 
 
 def read_files_contents(dir_path: str, paths: list[str]) -> dict[str, list[str]]:
@@ -89,7 +88,7 @@ def preprocess_lines(files_contents: dict[str, list[str]]) -> tuple[list[str], d
     return new_lines, address_names
 
 
-def create_sections_file(path: str, address_map: dict[str, str]):
+def create_sections_file(path: Path, address_map: dict[str, str]):
 
     HEADER = """
 OUTPUT_FORMAT(pei-i386)
@@ -146,7 +145,7 @@ def create_cxx_sections_file(path, address_map):
             f.write(f"\"{name}\" = {address};\n")
 
 
-def parse_sect_map(file_path: str) -> dict[str, str]:
+def parse_sect_map(file_path: Path) -> dict[str, str]:
     addresses = {}
     with open(file_path, "r") as f:
         line = f.readline()
@@ -206,14 +205,13 @@ def parse_sect_map(file_path: str) -> dict[str, str]:
     return addresses
 
 
-def remove_files_at(folder: str, pattern: str):
-    dir_path = Path(folder)
-    pathlist = dir_path.glob(pattern)
+def remove_files_at(folder: Path, pattern: str):
+    pathlist = folder.glob(pattern)
     for p in pathlist:
         p.unlink()
 
 
-def apply_sig_patches(file_path: str, data: bytearray):
+def apply_sig_patches(file_path: Path, data: bytearray):
     sig_patches = []
     with open(file_path, "r") as sig_f:
 
@@ -294,9 +292,8 @@ def apply_sig_patches(file_path: str, data: bytearray):
         i += 2
 
 
-def scan_for_headers_in_section(sections_path):
-
-    paths = [Path(s) for s in list_files_at(sections_path, "**/*.h")]
+def scan_for_headers_in_section(sections_path: Path):
+    paths = (Path(s) for s in list_files_at(sections_path, "**/*.h"))
     folders = {str(path.parent) for path in paths}
     return folders
 
@@ -306,9 +303,10 @@ def run_system(command: str) -> int:
     return os.system(command.replace("\n", " "))
 
 
-def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
+def main(_, target_folder, compiler_path, linker_path, hooks_compiler, * args):
+    target_path = Path(target_folder)
 
-    base_pe = PEData(f"{target_path}/ForgedAlliance_base.exe")
+    base_pe = PEData(target_path / "ForgedAlliance_base.exe")
     new_v_offset = 0
     new_f_offset = 0
 
@@ -323,12 +321,15 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     new_f_offset = align(new_f_offset, base_pe.filealign)
     print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
 
-    paths = find_patch_files(f"{target_path}/section/")
+    section_folder_path = target_path / "section"
+    build_folder_path = target_path / "build"
+
+    paths = find_patch_files(section_folder_path)
 
     # files_contents = read_files_contents(f"{target_path}/section/", paths)
     # files_contents, address_names = preprocess_lines(files_contents)
 
-    with open(f"{target_path}/section/main.cpp", "w") as main_file:
+    with open(section_folder_path / "main.cpp", "w") as main_file:
         for path in paths:
             main_file.writelines(f"#include \"{path}\"\n")
         # main_file.writelines(files_contents)
@@ -336,39 +337,39 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
     function_addresses = {
         name: name for name in scan_header_files(target_path)}
 
-    cxx_files_contents = read_files_contents(
-        f"{target_path}/section/", list_files_at(f"{target_path}/section/", "**/*.cxx", ["main.cxx"]))
+    cxx_files_contents = read_files_contents(section_folder_path, list_files_at(
+        section_folder_path, "**/*.cxx", ["main.cxx"]))
     cxx_files_contents, cxx_address_names = preprocess_lines(
         cxx_files_contents)
 
-    with open(f"{target_path}/section/main.cxx", "w") as main_file:
+    with open(section_folder_path / "main.cxx", "w") as main_file:
         main_file.writelines(cxx_files_contents)
 
-    folders = scan_for_headers_in_section(f"{target_path}/section")
+    folders = scan_for_headers_in_section(section_folder_path)
     includes = " ".join((f"-I ../section/{folder}/" for folder in folders))
 
     if run_system(
-            f"""cd {target_path}/build &
+            f"""cd {build_folder_path} &
             {compiler_path} {PRE_FLAGS}
             -I ../include/ {includes}
             ../section/main.cxx -o clangfile.o"""):
         raise Exception("Errors occurred during building of cxx files")
 
-    create_sections_file(f"{target_path}/section.ld",
+    create_sections_file(target_path / "section.ld",
                          function_addresses | cxx_address_names)
     if run_system(
-            f"""cd {target_path}/build &
+            f"""cd {build_folder_path} &
             {hooks_compiler} {FLAGS}
             -I ../include/ {includes}
             -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,sectmap.txt,-o,section.pe
             ../section/main.cpp"""):
         raise Exception("Errors occurred during building of patch files")
 
-    remove_files_at(f"{target_path}/build", "**/*.o")
+    remove_files_at(build_folder_path, "**/*.o")
 
-    addresses = parse_sect_map(f"{target_path}/build/sectmap.txt")
+    addresses = parse_sect_map(build_folder_path / "sectmap.txt")
 
-    def create_defines_file(path, addresses):
+    def create_defines_file(path: Path, addresses):
         with open(path, "w") as f:
             f.writelines([
                 "#define QUAUX(X) #X\n",
@@ -376,16 +377,16 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
             ])
             for name, address in addresses.items():
                 f.write(f"#define {name} {address}\n")
-    create_defines_file(f"{target_path}/define.h", addresses)
+    create_defines_file(target_path / "define.h", addresses)
 
     if run_system(
-            f"""cd {target_path}/build &
+            f"""cd {build_folder_path} &
             {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp"""):
         raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
-    for path in list_files_at(f"{target_path}/build", "**/*.o"):
-        coff_data = COFFData(f"{target_path}/build/{path}", f"build/{path}")
+    for path in list_files_at(build_folder_path, "**/*.o"):
+        coff_data = COFFData(build_folder_path / path, f"build/{path}")
         for sect in coff_data.sects:
             if len(sect.name) >= 8:
                 raise Exception(f"sect name too long {sect.name}")
@@ -396,11 +397,11 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
                     f"sect offset is larger than image base: {sect.offset:x}, base {base_pe.imgbase:x}")
         hooks.append(coff_data)
 
-    section_pe = PEData(f"{target_path}/build/section.pe")
+    section_pe = PEData(build_folder_path / "section.pe")
     ssize = section_pe.sects[-1].v_offset + \
         section_pe.sects[-1].v_size + section_pe.sects[0].v_offset
 
-    with open(f"{target_path}/patch.ld", "w") as pld:
+    with open(target_path / "patch.ld", "w") as pld:
         pld.writelines([
             "OUTPUT_FORMAT(pei-i386)\n",
             "OUTPUT(build/patch.pe)\n",
@@ -448,7 +449,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
         nonlocal base_file_data
         base_file_data[offset:offset+len(new_data)] = new_data
 
-    patch_pe = PEData(f"{target_path}/build/patch.pe")
+    patch_pe = PEData(build_folder_path / "patch.pe")
     hi = 0
     for hook in hooks:
         if len(hook.sects) == 0:
@@ -485,10 +486,10 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
         replace_data(section_pe.data[s.f_offset:s.f_offset+s.f_size],
                      nsect.f_offset+s.v_offset-section_pe.sects[0].v_offset)
 
-    apply_sig_patches(f"{target_path}/SigPatches.txt", base_file_data)
+    apply_sig_patches(target_path / "SigPatches.txt", base_file_data)
 
     def save_new_base_data(data: bytearray):
-        with open(f"{target_path}/ForgedAlliance_exxt.exe", "wb") as nf:
+        with open(target_path / "ForgedAlliance_exxt.exe", "wb") as nf:
             sect_count = len(base_pe.sects)
             nf.write(data)
             nf.seek(base_pe.offset+0x6)
@@ -504,7 +505,7 @@ def main(_, target_path, compiler_path, linker_path, hooks_compiler, * args):
 
     save_new_base_data(base_file_data)
 
-    remove_files_at(f"{target_path}/build", "**/*.o")
+    remove_files_at(build_folder_path, "**/*.o")
 
 
 if __name__ == "__main__":
