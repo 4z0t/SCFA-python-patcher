@@ -25,7 +25,7 @@ CALL_RE = re.compile(
 SPACES_RE = re.compile(" +")
 
 
-def scan_header_files(target_path: str) -> list[str]:
+def scan_header_files(target_path: Path) -> list[str]:
     functions_addresses = []
     contents = itertools.chain.from_iterable(read_files_contents(
         target_path, list_files_at(target_path, "**/*.h")).values())
@@ -50,12 +50,12 @@ def find_patch_files(folder_path: Path) -> list[str]:
     return list_files_at(folder_path, "**/*.cpp", ["main.cpp"])
 
 
-def read_files_contents(dir_path: str, paths: list[str]) -> dict[str, list[str]]:
+def read_files_contents(dir_path: Path, paths: list[str]) -> dict[str, list[str]]:
     files_contents: dict[str, list[str]] = {}
     for path in paths:
         files_contents[path] = []
         file_contents = files_contents[path]
-        with open(Path(dir_path) / path, "r")as f:
+        with open(dir_path / path, "r")as f:
             file_contents.extend(f.readlines())
             file_contents.append("\n")
 
