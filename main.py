@@ -369,7 +369,7 @@ def main(_, target_folder, compiler_path, linker_path, hooks_compiler, * args):
 
     addresses = parse_sect_map(build_folder_path / "sectmap.txt")
 
-    def create_defines_file(path: Path, addresses):
+    def create_defines_file(path: Path, addresses: dict[str, str]):
         with open(path, "w") as f:
             f.writelines([
                 "#define QUAUX(X) #X\n",
