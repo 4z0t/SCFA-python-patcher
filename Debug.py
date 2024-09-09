@@ -41,6 +41,11 @@ def main(args):
 
     log_path = Path(log_file_name)
     data = extract_crash_data(log_path)
+    for line in data[::-1]:
+        if line.strip() == "":
+            data.pop()
+        else:
+            break
     print("".join(data))
 
 
