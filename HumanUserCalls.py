@@ -1,6 +1,7 @@
 
 
 import re
+import pyperclip
 
 
 """
@@ -153,7 +154,11 @@ class Function:
 
 def main(s: str):
     fn = Function(s)
-    print(fn.convert())
+    result = fn.convert()
+
+    print(result)
+    print("Result is copied to clipboard")
+    pyperclip.copy(result)
 
 
 if __name__ == "__main__":
