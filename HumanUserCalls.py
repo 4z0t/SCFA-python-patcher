@@ -53,6 +53,8 @@ REGISTERS_32 = {
     "edx": "d",
     "esi": "S",
     "edi": "D",
+
+    "st0": "t",
 }
 
 XMM_REGISTERS = {f"xmm{i}" for i in range(16)}
