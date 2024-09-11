@@ -41,3 +41,55 @@ g++ compiler:
 
 python:
 * 3.12.4
+
+# HumanUserCalls.py
+
+A small script to convert x86 usercall/purge functions from IDA pseudo code into C ones made of GCC inline asm.
+Still suggested to check generated code as well as performing additional changes for asm.
+
+## Example
+
+Input:
+```cpp
+    char *__usercall Moho::DRAW_Rect@<eax>(
+                          Vector3f *vec1@<eax>,
+                          Vector3f *vec2@<ecx>,
+                          int color@<edi>,
+                          float thickness@<xmm0>,
+                          CD3DPrimBatcher *batcher,
+                          Vector3f *vec3,
+                          CHeightField *heightField,
+                          float a8)
+```
+Output:
+```cpp
+    output:  char* Moho::DRAW_Rect (
+                Vector3f* vec1,
+                Vector3f* vec2,
+                int color,
+                float thickness,
+                CD3DPrimBatcher* batcher,
+                Vector3f* vec3,
+                CHeightField* heightField,
+                float a8)
+            {
+            char* __result;
+            asm(
+                "push %[a8];"       
+                "push %[heightField];"
+                "push %[vec3];"
+                "push %[batcher];"
+                "movss xmm0, %[thickness];"
+                "call ADDRESS;"
+                "add esp, 0x10;"
+                : "=a" (__result)
+                : [vec1] "a" (vec1), [vec2] "c" (vec2), [color] "D" (color), [thickness] "m" (thickness), [batcher] "g" (batcher), [vec3] "g" (vec3), [heightField] "g" (heightField), [a8] "g" (a8)
+                :"xmm0"
+            );
+            return __result;
+            }
+```
+
+# Debug.py
+
+A script to debug game executable. Extracts from log crash data and uses build data to tell more information.
