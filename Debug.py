@@ -40,8 +40,7 @@ def load_exe_map(map_path: Path) -> list[tuple[int, str]]:
         while line:
             line = line.strip()
             address, name = line.split(" ", 1)
-            if not LOC_ADDR_RE.match(name):
-                map.append((int(address, 16), name))
+            map.append((int(address, 16), name))
             line = map_file.readline()
     return map
 
