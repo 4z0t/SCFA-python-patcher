@@ -95,7 +95,7 @@ def format_stack_trace(trace: list[int], names: list[tuple[int, str]]) -> str:
     s = []
     for addr in trace:
         address, name = find_name(addr)
-        s.append(f"0x{address:x} {name}")
+        s.append(f"{address:08x}\t{name}")
     return "\n".join(s)
 
 
