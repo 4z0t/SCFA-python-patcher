@@ -63,7 +63,7 @@ Input:
 ```
 Output:
 ```cpp
-    output:  char* Moho::DRAW_Rect (
+    char* Moho::DRAW_Rect (
                 Vector3f* vec1,
                 Vector3f* vec2,
                 int color,
