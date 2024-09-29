@@ -144,7 +144,7 @@ def create_cxx_sections_file(path, address_map):
 
 
 def parse_sect_map(file_path: Path) -> dict[str, str]:
-    addresses = {}
+    addresses: dict[str, str] = {}
     with open(file_path, "r") as f:
         line = f.readline()
         while not line.startswith(" *(.text*)"):
@@ -200,6 +200,9 @@ def parse_sect_map(file_path: Path) -> dict[str, str]:
             addresses[name] = address
 
             line = f.readline()
+
+    addresses = {name.split('@')[0]: address for name,
+                 address in addresses.items()}
     return addresses
 
 
