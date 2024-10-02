@@ -99,8 +99,8 @@ class Function:
         self.need_stack_clear: bool = groups[1] == "call"
         self.name: str = groups[2]
         self.register: str = groups[4]
-
-        check_register(self.register)
+        if self.register is not None:
+            check_register(self.register)
 
         args = groups[5]
         self.args: list[Arg] = [Arg(arg) for arg in FUNC_ARGS.findall(args)]
