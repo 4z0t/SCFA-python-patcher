@@ -7,14 +7,12 @@ from typing import Optional
 import struct
 import itertools
 
-FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
-                  ])
 
-PRE_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -nostartfiles -w -masm=intel -std=c++20 -march=core2 -c",
-                      ])
-
-HOOKS_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
+CLANG_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -nostartfiles -w -masm=intel -std=c++20 -march=core2 -c",
                         ])
+
+GCC_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
+                      ])
 SECT_SIZE = 0x80000
 
 ASM_RE = re.compile(r"(asm\(\"(0[xX][0-9a-fA-F]{1,8})\"\);)", re.IGNORECASE)
@@ -203,6 +201,8 @@ def parse_sect_map(file_path: Path) -> dict[str, str]:
 
     addresses = {name.split('@')[0]: address for name,
                  address in addresses.items()}
+    addresses = {name: address for name,
+                 address in addresses.items() if name}
     return addresses
 
 
@@ -304,7 +304,7 @@ def run_system(command: str) -> int:
     return os.system(command.replace("\n", " "))
 
 
-def patch(_, target_folder, compiler_path, linker_path, hooks_compiler, * args):
+def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path, * args):
     target_path = Path(target_folder)
 
     base_pe = PEData(target_path / "ForgedAlliance_base.exe")
@@ -351,7 +351,7 @@ def patch(_, target_folder, compiler_path, linker_path, hooks_compiler, * args):
 
     if run_system(
             f"""cd {build_folder_path} &
-            {compiler_path} {PRE_FLAGS}
+            {clang_compiler_path} {CLANG_FLAGS}
             -I ../include/ {includes}
             ../section/main.cxx -o clangfile.o"""):
         raise Exception("Errors occurred during building of cxx files")
@@ -360,7 +360,7 @@ def patch(_, target_folder, compiler_path, linker_path, hooks_compiler, * args):
                          function_addresses | cxx_address_names)
     if run_system(
             f"""cd {build_folder_path} &
-            {hooks_compiler} {FLAGS}
+            {gcc_compiler_path} {GCC_FLAGS}
             -I ../include/ {includes}
             -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,sectmap.txt,-o,section.pe
             ../section/main.cpp"""):
@@ -382,7 +382,7 @@ def patch(_, target_folder, compiler_path, linker_path, hooks_compiler, * args):
 
     if run_system(
             f"""cd {build_folder_path} &
-            {hooks_compiler} -c {HOOKS_FLAGS} ../hooks/*.cpp"""):
+            {gcc_compiler_path} -c {GCC_FLAGS} ../hooks/*.cpp"""):
         raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
