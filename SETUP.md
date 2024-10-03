@@ -31,6 +31,7 @@ You have 2 options:
 * Running patched game with files from FAF client gamedata
 * Running patched game with files from repo
 
+In both cases for better testing results you have to use [debugger](https://github.com/FAForever/FADeepProbe).
 
 # IDE
 
