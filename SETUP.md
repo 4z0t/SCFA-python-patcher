@@ -29,7 +29,7 @@ python main.py [Path to patches folder] [Path to clang++.exe] [Path to ld.exe] [
 After you successfully build, you have to test what you've got somehow.
 You have 2 options:
 * Running patched game with files from FAF client gamedata
-* Running patched game with files from repo
+* Running patched game with files from FAF repo
 
 In both cases for better testing results you have to use [debugger](https://github.com/FAForever/FADeepProbe).
 
