@@ -11,14 +11,14 @@ Clang compiler installation:
 * Goto [github releases of llvm](https://github.com/llvm/llvm-project/releases/tag/llvmorg-18.1.8)
 * Download **clang+llvm-18.1.8-x86_64-pc-windows-msvc.tar.xz**
 * Unpack into preferred location
-* You need `/bin/clang++.exe`
+* You need path to `/bin/clang++.exe`
 
 GCC compiler installation:
 * Install [MSYS2](https://www.msys2.org/)
 * Install GCC x32/x64 via MSYS console:
     * x32: pacman -S mingw-w64-i686-gcc
     * x64: pacman -S mingw-w64-x86_64-gcc
-* You need `/mingw32/bin/g++.exe` and `/mingw32/bin/ld.exe`
+* You need paths to `/mingw32/bin/g++.exe` and `/mingw32/bin/ld.exe`
 
 After everything installed you need to clone patches repo (right now only 4z0t's fork is compatible).
 
