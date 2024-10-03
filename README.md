@@ -3,6 +3,10 @@
 This repo is about python implementation of SCFA executable patcher.
 It uses both clang and gcc compilers to combine advantages of both compilers.
 
+# Setup
+
+See [SETUP.md](./SETUP.md).
+
 # Run
 
 To apply patcher on patch files run this command:
