@@ -98,7 +98,7 @@ def format_stack_trace(trace: list[int], names: list[tuple[int, str]]) -> str:
     return "\n".join(s)
 
 
-def main(args):
+def main(patches_folder_path, args):
 
     code = os.system(" ".join(args))
 
@@ -118,8 +118,8 @@ def main(args):
         else:
             break
 
-    exe_map = load_exe_map(Path("./result.map"))
-    sect = load_sect_map(Path("./FA-Binary-Patches")/"build"/"sectmap.txt")
+    exe_map = load_exe_map(Path("./exe.map"))
+    sect = load_sect_map(Path(patches_folder_path)/"build"/"sectmap.txt")
     exe_map.extend(sect)
 
     stack_trace = get_stack_trace(data)
@@ -129,12 +129,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # exe_map = load_exe_map(Path("./result.map"))
-    # sect = load_sect_map(Path("./FA-Binary-Patches")/"build"/"sectmap.txt")
-    # exe_map.extend(sect)
-
-    # stack_trace = get_stack_trace(
-    #     ["Stacktrace: 0x0043A15E 0x0043A61F 0x00438BDA 0x01291624 0x0128BC19 0x0128BC23 0x00914415 0x0092B2DF"])
-    # print(format_stack_trace(stack_trace, exe_map))
-    # pass
-    main(sys.argv[1:])
+    main(sys.argv[1], sys.argv[2:])
