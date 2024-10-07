@@ -97,3 +97,14 @@ Output:
 # Debug.py
 
 A script to debug game executable. Extracts from log crash data and uses build data to tell more information.
+
+`python Debug.py [Path to patches folder] [Command line arguments to run the game]`
+
+Example:
+
+```
+python ./Debug.py F:\GIT\FA-Binary-Patches ^
+            C:\ProgramData\FAForever\bin\FAFDebugger.exe ^
+            C:\ProgramData\FAForever\bin\ForgedAlliance_exxt.exe /init init-dev.lua /nobugreport /log C:\ProgramData\FAForever\bin\logs\game.log ^
+            /EnableDiskWatch /showlog
+```
