@@ -1,0 +1,40 @@
+# LuaObject
+009072F0 00907310 R LuaPlus::LuaObject::IsNil(LuaPlus::LuaObject *this)
+00907310 00907320 R LuaObject::IsTable(LuaPlus::LuaObject *this)
+00907320 00907340 R LuaPlus::LuaObject::IsUserData(LuaPlus::LuaObject *this)
+00907340 00907350 R LuaObject::IsCFunction(LuaPlus::LuaObject *this)
+00907580 009075A0 R LuaObject::RemoveFromUsedList
+009075A0 009075D0 U ?
+009075D0 009075F0 R LuaPlus::LuaObject::~LuaObject(LuaPlus::LuaObject *this)
+009075F0 00907610 R LuaPlus::LuaObject::Reset(LuaPlus::LuaObject *this)
+009072A0 009072B0 R LuaPlus::LuaObject::LuaObject(LuaPlus::LuaObject *this)
+00908810 00908890 R LuaPlus::LuaObject::SetObject
+009089C0 009089F0 R LuaObject::LuaObject(LuaState *state, int index)
+009089F0 00908A40 R LuaObject::LuaObject(LuaState *state, const TObject *obj)
+00908A40 00908A70 R LuaObject::LuaObject(const LuaObject &obj)
+00908AB0 00908B00 R LuaPlus::LuaObject::operator=(LuaPlus::LuaObject *this, LuaPlus::LuaObject *obj)
+00908B00 00908B50 R LuaPlus::LuaObject::operator=(LuaPlus::LuaObject *this, LuaPlus::LuaStackObject *a2)
+00908B50 00908BA0 R LuaPlus::LuaObject::TypeName
+00908DF0 00908E70 R LuaPlus::LuaObject::GetByIndex
+00908E70 00908EE0 R LuaPlus::LuaObject::GetByObject
+00909AF0 00909CE0 R LuaPlus::LuaObject::Insert
+00909CE0 00909EB0 R LuaPlus::LuaObject::Insert2
+00909EB0 0090A020 U LuaPlus::LuaObject::Remove
+0090A020 0090A160 U LuaPlus::LuaObject::Sort
+0090A180 0090A410 U LuaPlus::LuaObject::Clone
+
+# general
+00958B20 00958C40 O malloc
+00958C40 00958D60 O free
+00958D60 00958DC0 O getheapinfo
+00957EA0 00957EF0 O msize
+00A825B9 00A8262F O new
+00957B00 00957BA0 O realloc
+00A89110 00A89190 O memset
+00A89190 00A89525 O memcpy
+00A96630 00A966B8 O strcmp
+00A94450 00A944E0 O strlen
+00A89950 00A899A0 O CxxThrowException
+
+# win
+004F2730 004F2800 O Moho::WIN_CopyToClipboard(const wchar_t*)
