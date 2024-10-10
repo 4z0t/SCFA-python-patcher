@@ -23,6 +23,8 @@ class Section:
         return s
 
     def to_cpp(self, index: int) -> str:
+        if self._address is None:
+            return self.lines_to_cpp()
         return f'SECTION({index}, {self._address})\n{self.lines_to_cpp()}'
 
 
@@ -53,8 +55,7 @@ def load_hook(file_path: Path) -> Hook:
                 continue
 
             if match := ADDRESS_RE.match(line):
-                if address:
-                    sections.append(Section(address, lines))
+                sections.append(Section(address, lines))
                 lines = []
                 address = match.group(1)
                 continue
