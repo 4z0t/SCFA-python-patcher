@@ -516,3 +516,4 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
     save_new_base_data(base_file_data)
 
     remove_files_at(build_folder_path, "**/*.o")
+    remove_files_at(target_path/"hooks", "*.hook.cpp")
