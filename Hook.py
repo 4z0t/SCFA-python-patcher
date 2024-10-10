@@ -1,6 +1,5 @@
 import re
 from pathlib import Path
-import Patcher
 
 ADDRESS_RE = re.compile(r"^#(0[xX][0-9A-Fa-f]{6,8})\:$")
 FUNCTION_NAME_RE = re.compile(r"@([a-zA-Z\_][a-zA-Z0-9\_]+)")
@@ -60,14 +59,3 @@ def load_hook(file_path: Path) -> Hook:
             lines.append(line)
         sections.append(Section(address, lines))
         return Hook(sections)
-
-
-def scan_hooks(folder_path_s: str):
-    folder_path = Path(folder_path_s)
-    for file_path in Patcher.list_files_at(folder_path, "*.hook"):
-        hook = load_hook(folder_path/file_path)
-        with open(folder_path/(Path(file_path).name+".cpp"), "w") as f:
-            f.write(hook.to_cpp())
-
-
-scan_hooks("F:\\GIT\\SCFA-python-patcher\\FA-Binary-Patches\\hooks\\")

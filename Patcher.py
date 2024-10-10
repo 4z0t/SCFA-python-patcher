@@ -6,6 +6,7 @@ import re
 from typing import Optional
 import struct
 import itertools
+import Hook
 
 
 CLANG_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -nostartfiles -w -masm=intel -std=c++20 -march=core2 -c",
@@ -379,6 +380,14 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
             for name, address in addresses.items():
                 f.write(f"#define {name} {address}\n")
     create_defines_file(target_path / "define.h", addresses)
+
+    def generate_hook_files(folder_path: Path):
+        for file_path in list_files_at(folder_path, "*.hook"):
+            hook = Hook. load_hook(folder_path/file_path)
+            with open(folder_path/(Path(file_path).name+".cpp"), "w") as f:
+                f.write(hook.to_cpp())
+
+    generate_hook_files(target_path/"hooks")
 
     if run_system(
             f"""cd {build_folder_path} &
