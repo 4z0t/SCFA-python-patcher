@@ -63,7 +63,7 @@ def scan_hooks(folder_path_s: str):
     folder_path = Path(folder_path_s)
     for file_path in Patcher.list_files_at(folder_path, "*.hook"):
         hook = load_hook(folder_path/file_path)
-        with open(folder_path/(Path(file_path).stem+"_.cpp"), "w") as f:
+        with open(folder_path/(Path(file_path).name+".cpp"), "w") as f:
             f.write(hook.to_cpp())
 
 
