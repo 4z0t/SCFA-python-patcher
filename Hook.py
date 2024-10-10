@@ -25,7 +25,7 @@ class Section:
     def to_cpp(self, index: int) -> str:
         if self._address is None:
             return self.lines_to_cpp()
-        return f'SECTION({index}, {self._address})\n{self.lines_to_cpp()}'
+        return f'SECTION({index:X}, {self._address})\n{self.lines_to_cpp()}'
 
 
 class Hook:
