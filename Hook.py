@@ -15,6 +15,10 @@ class Section:
     def lines_to_cpp(self):
         s = ""
         for line in self._lines:
+            if line.endswith(":"):  # jump label
+                s += f'"{line}"\n'
+                continue
+
             if FUNCTION_NAME_RE.findall(line):
                 line = FUNCTION_NAME_RE.sub(r'"QU(\1)"', line)
 
@@ -43,7 +47,10 @@ def load_hook(file_path: Path) -> Hook:
     address = None
     with open(file_path) as f:
         for line in f.readlines():
-            line = line.split("//")[0]  # remove comments
+            # remove comments
+            line = line.split("//")[0]
+            if not line.startswith("#"):
+                line = line.split("#")[0]
             line = line.strip()
             if not line:
                 continue
