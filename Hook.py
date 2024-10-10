@@ -31,8 +31,9 @@ class Hook:
 
     def to_cpp(self):
         s = '#include "../asm.h"\n#include "../define.h"\n'
-        s += f"asm(\n{''.join((section.to_cpp(i)
-                               for i, section in enumerate(self._sections)))});"
+        sections_lines = (section.to_cpp(i).split("\n")
+                          for i, section in enumerate(self._sections))
+        s += f"asm(\n{''.join((f"    {line}\n" for lines in sections_lines for line in lines))});"
         return s
 
 
