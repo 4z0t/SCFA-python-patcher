@@ -426,7 +426,7 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
         for hook in hooks:
             for sect in hook.sects:
                 pld.writelines([
-                    f" .h{hi} 0x{sect.offset:x} : SUBALIGN(1) {{\n",
+                    f" .h{hi:X} 0x{sect.offset:x} : SUBALIGN(1) {{\n",
                     f"     {hook.name}({sect.name})\n",
                     " }\n",
                 ])
@@ -466,7 +466,7 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
             print(f"No hooks in {hook.name}")
             continue
         for sect in hook.sects:
-            psect = patch_pe.find_sect(f".h{hi}")
+            psect = patch_pe.find_sect(f".h{hi:X}")
             size = sect.size
             replace_data(
                 patch_pe.data[psect.f_offset:psect.f_offset + size], psect.v_offset)
