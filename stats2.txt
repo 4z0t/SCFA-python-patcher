@@ -59,8 +59,9 @@
 004022d0 00402350 X sub_4022D0
 00402350 00402360 X sub_402350
 00402360 00402370 X sub_402360
-00402370 004023a0 X string_dtor
-004023a0 004023fb X ?_Myptr@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@IAEPADXZ
+00402370 004023a0 R string_dtor
+004023a0 004023E0 R const char *__thiscall std::string::c_str(std::string *this)
+004023E0 004023fb U ?
 004023fb 00402400 X locret_4023FB
 00402400 00402420 X ??1?$Broadcaster@ABUSDiskWatchEvent@Moho@@@Moho@@QAE@XZ
 00402420 004024c0 X sub_402420
