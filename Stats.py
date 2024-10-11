@@ -58,6 +58,8 @@ def read_file_functions_data_with_end(file_path) -> list[Function]:
             start = int(start, 16)
             fn = Function(start, end, name, type.upper())
             functions.append(fn)
+    if fn is not None:
+        fn.end = TEXT_END
     return functions
 
 
