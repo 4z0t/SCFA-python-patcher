@@ -1877,8 +1877,8 @@
 00430df0 X sub_430DF0
 00430f90 X sub_430F90
 004310d0 X sub_4310D0
-00431390 X wstring_dtor
-004313c0 X ?_Myptr@?$basic_string@GU?$char_traits@G@std@@V?$allocator@G@2@@std@@IAEPAGXZ
+00431390 R std::wstring::~wstring(wstring *this)
+004313c0 R wstring::c_str(wstring *this)
 004313d0 X sub_4313D0
 004313e0 X sub_4313E0
 00431480 X ?Reset@?$MemBuffer@$$CBD@gpg@@QAEXXZ
@@ -3353,11 +3353,11 @@
 00457920 X sub_457920
 00457970 X sub_457970
 004579d0 X ?GetGlobal@LuaState@LuaPlus@@QAE?AVLuaObject@2@PBD@Z
-00457a40 X LuaPlus__TableIterator__Ctor
-00457b10 X ??1CSndVar@Moho@@QAE@XZ
-00457b60 X sub_457B60
-00457ba0 X sub_457BA0
-00457c30 X sub_457C30
+00457a40 R LuaPlus::LuaTableIterator::LuaTableIterator(LuaPlus::LuaTableIterator *this,LuaPlus::LuaObject *tableObj,char doReset)
+00457b10 R LuaPlus::LuaTableIterator::~LuaTableIterator(LuaPlus::LuaTableIterator *this)
+00457b60 R TableIterator::Reset_(LuaPlus::LuaTableIterator *this)
+00457ba0 R LuaPlus::LuaTableIterator::Next(LuaPlus::LuaTableIterator *this)
+00457c30 R LuaPlus::LuaTableIterator::GetValue(LuaPlus::LuaTableIterator *this)
 00457c70 X nullsub_375
 00457c80 X ?GetNumEntries@CZipFile@Moho@@QBEIXZ
 00457cb0 X ?Write16@wxDataOutputStream@@QAEXG@Z
@@ -39857,9 +39857,9 @@
 0090c780 T lua_typename(lua::lua_State *L, enum_LuaObjType t)
 0090c7a0 T lua_isnumber(lua::lua_State *L, int idx)
 0090c800 T lua_isstring(lua::lua_State *L, int idx)
-0090c850 X ?lua_isuserdata@@YAHPAUlua_State@@H@Z
-0090c890 X ?lua_rawequal@@YAHPAUlua_State@@HH@Z
-0090c900 X ?lua_equal@@YAHPAUlua_State@@HH@Z
+0090c850 T lua_isuserdata(lua::lua_State *a1, int a2)
+0090c890 T lua_rawequal(lua::lua_State *L, int index1, int index2)
+0090c900 T lua_equal(lua::lua_State *a1, int a2, int idx)
 0090c980 X ?lua_lessthan@@YAHPAUlua_State@@HH@Z
 0090c9f0 X ?lua_tonumber@@YAMPAUlua_State@@H@Z
 0090ca40 X ?lua_toboolean@@YA_NPAUlua_State@@H@Z

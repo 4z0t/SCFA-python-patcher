@@ -72,6 +72,19 @@
 0090C780 0090C7A0 T lua_typename(lua::lua_State *L, enum_LuaObjType t)
 0090C7A0 0090C800 T lua_isnumber(lua::lua_State *L, int idx)
 0090C800 0090C850 T lua_isstring(lua::lua_State *L, int idx)
+0090C850 0090C890 T lua_isuserdata(lua::lua_State *a1, int a2)
+0090C890 0090C900 T lua_rawequal(lua::lua_State *L, int index1, int index2)
+0090C900 0090C980 T lua_equal(lua::lua_State *a1, int a2, int idx)
+
+
+00431390 004313C0 R std::wstring::~wstring(wstring *this)
+004313C0 004313D0 R wstring::c_str(wstring *this)
+
+00457BA0 00457BF9 R LuaPlus::LuaTableIterator::Next(LuaPlus::LuaTableIterator *this)
+00457C30 00457C62 R LuaPlus::LuaTableIterator::GetValue(LuaPlus::LuaTableIterator *this)
+00457A40 00457B10 R LuaPlus::LuaTableIterator::LuaTableIterator(LuaPlus::LuaTableIterator *this,LuaPlus::LuaObject *tableObj,char doReset)
+00457B10 00457B60 R LuaPlus::LuaTableIterator::~LuaTableIterator(LuaPlus::LuaTableIterator *this)
+00457B60 00457BA0 R TableIterator::Reset_(LuaPlus::LuaTableIterator *this)
 
 
 
