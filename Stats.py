@@ -32,6 +32,23 @@ def compute_total(type):
 
 def read_file_functions_data(file_path) -> list[Function]:
     functions = []
+    fn = None
+    with open(file_path, "r") as f:
+        for line in f.readlines():
+            line = line.strip()
+            if line.startswith("#") or not line:
+                continue
+            start, type, name = line.split(" ", 2)
+            start = int(start, 16)
+            if fn is not None:
+                fn.end = start
+            fn = Function(start, 0, name, type.upper())
+            functions.append(fn)
+    return functions
+
+
+def read_file_functions_data_with_end(file_path) -> list[Function]:
+    functions = []
     with open(file_path, "r") as f:
         for line in f.readlines():
             line = line.strip()
@@ -39,16 +56,15 @@ def read_file_functions_data(file_path) -> list[Function]:
                 continue
             start, end, type, name = line.split(" ", 3)
             start = int(start, 16)
-            end = int(end, 16)
-            functions.append(
-                Function(start, end, name, type.upper()))
+            fn = Function(start, end, name, type.upper())
+            functions.append(fn)
     return functions
 
 
 def write_file_functions_data(file_path, functions: list[Function]):
     with open(file_path, "w") as f:
         for fn in functions:
-            f.write(f"{fn.start:08x} {fn.end:08x} {fn.type} {fn.name}\n")
+            f.write(f"{fn.start:08x} {fn.type} {fn.name}\n")
     return functions
 
 
@@ -61,7 +77,7 @@ def merge_stats(file_dest, file_source):
                 return i
         return None
 
-    new_functions = read_file_functions_data(file_source)
+    new_functions = read_file_functions_data_with_end(file_source)
     for fn in new_functions:
         i = find_by_start(fn.start)
         if i is not None:
@@ -73,4 +89,4 @@ def merge_stats(file_dest, file_source):
     write_file_functions_data(file_dest, initial)
 
 
-merge_stats("stats2.txt", "stats.txt")
+merge_stats("stats3.txt", "stats.txt")
