@@ -39821,11 +39821,11 @@
 0090bdd0 X sub_90BDD0
 0090be70 X sub_90BE70
 0090bea0 X ?GetUserData@LuaStackObject@LuaPlus@@QBE?AVRRef@gpg@@XZ
-0090bee0 X ?GetActiveState@LuaState@LuaPlus@@QAEPAV12@XZ
-0090bef0 X ?GetActiveCState@LuaState@LuaPlus@@QAEPAUlua_State@@XZ
+0090bee0 T LuaPlus::LuaState::GetActiveState(LuaPlus::LuaState *this)
+0090bef0 T LuaPlus::LuaState::GetActiveCState(LuaPlus::LuaState *this)
 0090bf00 X ?Equal@LuaState@LuaPlus@@QAEHABVLuaObject@2@0@Z
 0090bf40 X ?LessThan@LuaState@LuaPlus@@QAEHABVLuaObject@2@0@Z
-0090bf70 X sub_90BF70
+0090bf70 T LuaState::ArgError(LuaPlus::LuaState *this, int narg, const char *extramsg)
 0090bf90 X sub_90BF90
 0090bfd0 X ?DoBuffer@LuaState@LuaPlus@@QAEHPBDI0@Z
 0090c010 X ?OptNumber@LuaState@LuaPlus@@QAEMHM@Z
@@ -39835,28 +39835,28 @@
 0090c090 X ?CheckInt@LuaState@LuaPlus@@QAEHH@Z
 0090c0d0 X ?OptInt@LuaState@LuaPlus@@QAEHHH@Z
 0090c1b0 X ?PushFString@LuaState@LuaPlus@@QAAPBDPBDZZ
-0090c1d0 X ?Error@LuaState@LuaPlus@@QAAHPBDZZ
+0090c1d0 T LuaPlus::LuaState::Error(LuaPlus::LuaState *this, char *fmt, ...)
 0090c200 X nullsub_3389
 0090c210 X sub_90C210
 0090c260 X sub_90C260
 0090c270 X sub_90C270
 0090c2e0 X sub_90C2E0
-0090c340 X ?negindex@@YAPAUTObject@@PAUlua_State@@H@Z
-0090c3d0 X luaA_index
-0090c420 X sub_90C420
-0090c460 X ?lua_checkstack@@YAHPAUlua_State@@H@Z
-0090c4c0 X ?lua_xmove@@YAXPAUlua_State@@0H@Z
-0090c530 X ?lua_newthread@@YAPAUlua_State@@PAU1@@Z
-0090c590 X ?lua_gettop@@YAHPAUlua_State@@@Z
-0090c5a0 X ?lua_settop@@YAXPAUlua_State@@H@Z
-0090c5f0 X ?lua_remove@@YAXPAUlua_State@@H@Z
-0090c640 X ?lua_insert@@YAXPAUlua_State@@H@Z
-0090c690 X ?lua_replace@@YAXPAUlua_State@@H@Z
-0090c6e0 X ?lua_pushvalue@@YAXPAUlua_State@@H@Z
-0090c740 X ?lua_type@@YAHPAUlua_State@@H@Z
-0090c780 X ?lua_typename@@YAPBDPAUlua_State@@H@Z
-0090c7a0 X ?lua_isnumber@@YAHPAUlua_State@@H@Z
-0090c800 X ?lua_isstring@@YAHPAUlua_State@@H@Z
+0090c340 T negindex(lua::lua_State *L, int idx)
+0090c3d0 T luaA_index(lua::lua_State *L, int idx)
+0090c420 T luaA_pushobject(lua::lua_State *L, const lua::TObject *o)
+0090c460 T lua_checkstack(lua::lua_State *L, int size)
+0090c4c0 T lua_xmove(lua::lua_State *from, lua::lua_State *to, int n)
+0090c530 T lua_newthread(lua::lua_State *L)
+0090c590 T lua_gettop(lua::lua_State *L)
+0090c5a0 T lua_settop(lua::lua_State *L, int idx)
+0090c5f0 T lua_remove(lua::lua_State *L, int idx)
+0090c640 T lua_insert(lua::lua_State *L, int idx)
+0090c690 T lua_replace(lua::lua_State *L, int idx)
+0090c6e0 T lua_pushvalue(lua::lua_State *L, int idx)
+0090c740 T lua_type(lua::lua_State *L, int idx)
+0090c780 T lua_typename(lua::lua_State *L, enum_LuaObjType t)
+0090c7a0 T lua_isnumber(lua::lua_State *L, int idx)
+0090c800 T lua_isstring(lua::lua_State *L, int idx)
 0090c850 X ?lua_isuserdata@@YAHPAUlua_State@@H@Z
 0090c890 X ?lua_rawequal@@YAHPAUlua_State@@HH@Z
 0090c900 X ?lua_equal@@YAHPAUlua_State@@HH@Z

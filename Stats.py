@@ -96,10 +96,12 @@ def compute_total(functions, type):
     return total
 
 
-ratio = (compute_total(functions, "R") + compute_total(functions, "O")) / \
+ratio = (compute_total(functions, "R") + compute_total(functions, "O") + compute_total(functions, "T")) / \
     (TEXT_END-TEXT_START-compute_total(functions, "U"))
 print(f"Replicated: {ratio*100:.3f}%")
 print(f"Unused functions bytes:\t\t{compute_total(functions, "U")}")
 print(f"Replicated functions bytes:\t{compute_total(functions, "R")}")
 print(f"Original functions bytes:\t{compute_total(functions, "O")}")
 print(f"To be replicated:\t\t{compute_total(functions, "T")}")
+print(f"Unknown:\t\t{(compute_total(functions, "X")) /
+      (TEXT_END-TEXT_START)*100:.3f}%")

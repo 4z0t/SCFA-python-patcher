@@ -52,6 +52,29 @@
 0090B1C0 0090B1E0 T LuaPlus::LuaState::Dtor(LuaPlus::LuaState *a1)
 0090B1E0 0090B380 N ?
 
+0090BEE0 0090BEF0 T LuaPlus::LuaState::GetActiveState(LuaPlus::LuaState *this)
+0090BEF0 0090BF00 T LuaPlus::LuaState::GetActiveCState(LuaPlus::LuaState *this)
+0090BF70 0090BF7D T LuaState::ArgError(LuaPlus::LuaState *this, int narg, const char *extramsg)
+0090C1D0 0090C1EA T LuaPlus::LuaState::Error(LuaPlus::LuaState *this, char *fmt, ...)
+0090C340 0090C3D0 T negindex(lua::lua_State *L, int idx)
+0090C3D0 0090C3E8 T luaA_index(lua::lua_State *L, int idx)
+0090C420 0090C451 T luaA_pushobject(lua::lua_State *L, const lua::TObject *o)
+0090C460 0090C4B4 T lua_checkstack(lua::lua_State *L, int size)
+0090C4C0 0090C526 T lua_xmove(lua::lua_State *from, lua::lua_State *to, int n)
+0090C530 0090C58F T lua_newthread(lua::lua_State *L)
+0090C590 0090C59D T lua_gettop(lua::lua_State *L)
+0090C5A0 0090C5EC T lua_settop(lua::lua_State *L, int idx)
+0090C5F0 0090C640 T lua_remove(lua::lua_State *L, int idx)
+0090C640 0090C690 T lua_insert(lua::lua_State *L, int idx)
+0090C690 0090C6E0 T lua_replace(lua::lua_State *L, int idx)
+0090C6E0 0090C740 T lua_pushvalue(lua::lua_State *L, int idx)
+0090C740 0090C780 T lua_type(lua::lua_State *L, int idx)
+0090C780 0090C7A0 T lua_typename(lua::lua_State *L, enum_LuaObjType t)
+0090C7A0 0090C800 T lua_isnumber(lua::lua_State *L, int idx)
+0090C800 0090C850 T lua_isstring(lua::lua_State *L, int idx)
+
+
+
 # general
 00958B20 00958C40 O malloc
 00958C40 00958D60 O free
