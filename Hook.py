@@ -14,7 +14,7 @@ class Section:
     def lines_to_cpp(self):
         s = ""
         for line in self._lines:
-            line = line.replace("\"", "\\\"")
+            line = line.translate(str.maketrans({"\"":  r"\"", "\\": r"\\", }))
 
             if FUNCTION_NAME_RE.findall(line):
                 line = FUNCTION_NAME_RE.sub(r'"QU(\1)"', line)
