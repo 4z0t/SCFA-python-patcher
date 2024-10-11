@@ -22,6 +22,35 @@
 00909EB0 0090A020 U LuaPlus::LuaObject::Remove
 0090A020 0090A160 U LuaPlus::LuaObject::Sort
 0090A180 0090A410 U LuaPlus::LuaObject::Clone
+0090A410 0090A4C0 R LuaPlus::LuaObject::GetTableCount(LuaPlus::LuaObject *this)
+0090A4C0 0090A4D0 U ?
+0090A4D0 0090A510 U ?
+
+# Lua State
+0090A510 0090A520 T LuaPlus::LuaState::CastState(lua::lua_State *state)
+0090A520 0090A5D0 T LuaPlus::LuaState::LuaState(LuaPlus::LuaState *this, LuaPlus::LuaState *a2)
+0090A5D0 0090A600 T LuaState::LuaState(LuaPlus::LuaState *this, int a2)
+0090A600 0090A690 T LuaPlus::LuaState::~LuaState(LuaPlus::LuaState *this)
+0090A690 0090A6B0 T LuaPlus::LuaState::GetGlobals(LuaPlus::LuaState *this, LuaPlus::LuaObject *dest)
+0090A6B0 0090A780 T LuaPlusH_next(LuaPlus::LuaState *state,LuaPlus::LuaObject *table,LuaPlus::LuaObject *key,LuaPlus::LuaObject *value)
+0090A780 0090A7D0 N userGCFunction(lua::GCState *a1)
+0090A7D0 0090A8C0 N sub_90A7D0(LuaPlus::LuaState *stateUserData, lua::lua_State *L)
+0090A8C0 0090AAD0 N LS_LOG()
+0090AAD0 0090AC10 T LuaState::Init(LuaPlus::LuaState *this, StandardLibraries initStandardLibrary)
+0090AC10 0090ACB0 T LuaPlus::LuaState::LuaState(LuaPlus::LuaState *this, StandardLibraries a2)
+0090ACB0 0090AD00 U ?
+0090AD00 0090AD30 T lua_setdefaultmetatable(lua::lua_State *L, int type)
+0090AD30 0090AE00 T lua_getn(lua::lua_State *L, int index)
+0090AE00 0090AE30 U ?
+0090AE30 0090AE70 U sub_90AE30(lua::lua_State *L, int idx, void *a3)
+0090AE70 0090AF50 U ?
+0090AF50 0090AF80 N sub_90AF50(int a1, void *Buffer, size_t ElementSize, FILE *Stream)
+0090AF80 0090AFB0 T LS_import(lua::lua_State *state)
+0090AFB0 0090B0D0 T LS_dump(LuaPlus::LuaState *a1)
+0090B0D0 0090B150 T ScriptFunctionsRegister(LuaPlus::LuaState *state)
+0090B150 0090B1C0 U ?
+0090B1C0 0090B1E0 T LuaPlus::LuaState::Dtor(LuaPlus::LuaState *a1)
+0090B1E0 0090B380 N ?
 
 # general
 00958B20 00958C40 O malloc

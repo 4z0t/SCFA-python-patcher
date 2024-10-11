@@ -39766,35 +39766,36 @@
 0090a020 U LuaPlus::LuaObject::Sort
 0090a160 X ?GetByName@LuaObject@LuaPlus@@QBE?AV12@PBD@Z
 0090a180 U LuaPlus::LuaObject::Clone
-0090a410 X ?GetTableCount@LuaObject@LuaPlus@@QBEHXZ
-0090a4c0 X ?GetEffectFilename@CD3DEffect@Moho@@QAEABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
-0090a4d0 X ?lua_pushtobject@LuaPlus@@YAXPAUlua_State@@PAX@Z
-0090a510 X LuaPlus__GetLuaState
-0090a520 X ??0LuaState@LuaPlus@@QAE@PAV01@@Z
-0090a5d0 X ??0LuaState@LuaPlus@@QAE@W4UnattachedTag@01@@Z
-0090a600 X ??1LuaState@LuaPlus@@QAE@XZ
-0090a690 X ?GetGlobals@LuaState@LuaPlus@@QAE?AVLuaObject@2@XZ
-0090a6b0 X ?LuaPlusH_next@LuaPlus@@YA_NPAVLuaState@1@PBVLuaObject@1@PAV31@2@Z
-0090a780 X sub_90A780
-0090a7d0 X sub_90A7D0
-0090a8c0 X sub_90A8C0
-0090aad0 X ?Init@LuaState@LuaPlus@@AAEXW4StandardLibraries@12@@Z
-0090ac10 X ??0LuaState@LuaPlus@@QAE@W4StandardLibraries@01@@Z
-0090acb0 X ?lua_getdefaultmetatable@@YAXPAUlua_State@@H@Z
-0090ad00 X ?lua_setdefaultmetatable@@YAXPAUlua_State@@H@Z
-0090ad30 X ?lua_getn@@YAHPAUlua_State@@H@Z
+0090a410 R LuaPlus::LuaObject::GetTableCount(LuaPlus::LuaObject *this)
+0090a4c0 U ?
+0090a4d0 U ?
+0090a510 T LuaPlus::LuaState::CastState(lua::lua_State *state)
+0090a520 T LuaPlus::LuaState::LuaState(LuaPlus::LuaState *this, LuaPlus::LuaState *a2)
+0090a5d0 T LuaState::LuaState(LuaPlus::LuaState *this, int a2)
+0090a600 T LuaPlus::LuaState::~LuaState(LuaPlus::LuaState *this)
+0090a690 T LuaPlus::LuaState::GetGlobals(LuaPlus::LuaState *this, LuaPlus::LuaObject *dest)
+0090a6b0 T LuaPlusH_next(LuaPlus::LuaState *state,LuaPlus::LuaObject *table,LuaPlus::LuaObject *key,LuaPlus::LuaObject *value)
+0090a780 N userGCFunction(lua::GCState *a1)
+0090a7d0 N sub_90A7D0(LuaPlus::LuaState *stateUserData, lua::lua_State *L)
+0090a8c0 N LS_LOG()
+0090aad0 T LuaState::Init(LuaPlus::LuaState *this, StandardLibraries initStandardLibrary)
+0090ac10 T LuaPlus::LuaState::LuaState(LuaPlus::LuaState *this, StandardLibraries a2)
+0090acb0 U ?
+0090ad00 T lua_setdefaultmetatable(lua::lua_State *L, int type)
+0090ad30 T lua_getn(lua::lua_State *L, int index)
 0090ade0 X sub_90ADE0
-0090ae00 X ?lua_pushstdcallcfunction@@YAXPAUlua_State@@P6GH0@Z@Z
-0090ae30 X ?lua_safetostring@@YAXPAUlua_State@@HPAD@Z
-0090af50 X sub_90AF50
-0090af80 X sub_90AF80
-0090afb0 X sub_90AFB0
-0090b0d0 X sub_90B0D0
-0090b150 X sub_90B150
+0090ae00 U ?
+0090ae30 U sub_90AE30(lua::lua_State *L, int idx, void *a3)
+0090ae70 U ?
+0090af50 N sub_90AF50(int a1, void *Buffer, size_t ElementSize, FILE *Stream)
+0090af80 T LS_import(lua::lua_State *state)
+0090afb0 T LS_dump(LuaPlus::LuaState *a1)
+0090b0d0 T ScriptFunctionsRegister(LuaPlus::LuaState *state)
+0090b150 U ?
 0090b160 X nullsub_3388
 0090b1b0 X sub_90B1B0
-0090b1c0 X sub_90B1C0
-0090b1e0 X sub_90B1E0
+0090b1c0 T LuaPlus::LuaState::Dtor(LuaPlus::LuaState *a1)
+0090b1e0 N ?
 0090b380 X sub_90B380
 0090b410 X sub_90B410
 0090b560 X sub_90B560
