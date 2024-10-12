@@ -5838,7 +5838,7 @@
 004a4ef0 X sub_4A4EF0
 004a4f10 X sub_4A4F10
 004a4f20 X sub_4A4F20
-004a4f30 X sub_4A4F30
+004a4f30 R LuaPlus::LuaTableIterator::GetKey(LuaPlus::LuaTableIterator *this)
 004a4f70 X sub_4A4F70
 004a4fa0 X sub_4A4FA0
 004a4fb0 X sub_4A4FB0

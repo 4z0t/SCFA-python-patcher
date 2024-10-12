@@ -85,7 +85,7 @@
 00457A40 00457B10 R LuaPlus::LuaTableIterator::LuaTableIterator(LuaPlus::LuaTableIterator *this,LuaPlus::LuaObject *tableObj,char doReset)
 00457B10 00457B60 R LuaPlus::LuaTableIterator::~LuaTableIterator(LuaPlus::LuaTableIterator *this)
 00457B60 00457BA0 R TableIterator::Reset_(LuaPlus::LuaTableIterator *this)
-
+004A4F30 004A4F70 R LuaPlus::LuaTableIterator::GetKey(LuaPlus::LuaTableIterator *this)
 
 
 # general
