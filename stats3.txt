@@ -8513,11 +8513,10 @@
 004f25c0 X sub_4F25C0
 004f25d0 X sub_4F25D0
 004f2730 O Moho::WIN_CopyToClipboard(const wchar_t*)
-004f2800 X sub_4F2800
-004f2900 X sub_4F2900
-004f2a00 X sub_4F2A00
-004f2a00 X sub_4F2A00
-004f2b40 X ?Quit@wxBestHelpController@@UAE_NXZ
+004f2800 O Moho::WIN_OkBox(const char *caption, const char *text)
+004f2900 O Moho::WIN_YesNoBox(const char *a1, const char *a2)
+004f2a00 O Moho::WIN_GetLastError(std::string *a1)
+004f2b40 O Moho::WIN_AppRequestExit()
 004f2b50 X sub_4F2B50
 004f2c30 X sub_4F2C30
 004f2ca0 X sub_4F2CA0

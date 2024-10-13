@@ -103,3 +103,8 @@
 
 # win
 004F2730 004F2800 O Moho::WIN_CopyToClipboard(const wchar_t*)
+004F2800 004F2900 O Moho::WIN_OkBox(const char *caption, const char *text)
+004F2900 004F2A00 O Moho::WIN_YesNoBox(const char *a1, const char *a2)
+004F2A00 004F2B40 O Moho::WIN_GetLastError(std::string *a1)
+004F2B40 004F2B50 O Moho::WIN_AppRequestExit()
+
