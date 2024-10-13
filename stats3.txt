@@ -1094,23 +1094,23 @@
 0041be50 X sub_41BE50
 0041be80 X sub_41BE80
 0041beb0 X sub_41BEB0
-0041bff0 X sub_41BFF0
+0041bff0 N Moho::CON_ParseCommand(const char *a1, std::string **a2, std::string *a3)
 0041c400 X sub_41C400
 0041c4d0 X sub_41C4D0
 0041c600 X sub_41C600
 0041c770 X sub_41C770
 0041c8f0 X ?UnDirty@Entity@Moho@@IAEXXZ
 0041c910 X sub_41C910
-0041c990 X ConsoleLogF
+0041c990 N Moho::CON_Printf(const char *fmt, ...)
 0041cb60 X sub_41CB60
 0041cb80 X sub_41CB80
-0041cbe0 X sub_41CBE0
+0041cbe0 T cfunc_ConExecuteL@<eax>(LuaPlus::LuaState *a1@<eax>)
 0041cc60 X sub_41CC60
 0041cc90 X sub_41CC90
-0041d100 X ?CON_Executef@Moho@@YAXPBDZZ
+0041d100 T Moho::CON_Executef(const char *a1, ...)
 0041d180 X sub_41D180
 0041d1a0 X sub_41D1A0
-0041d200 X sub_41D200
+0041d200 T cfunc_ConExecuteSaveL@<eax>(LuaPlus::LuaState *a1@<esi>)
 0041d270 X sub_41D270
 0041d370 X ?CON_ExecuteLastCommand@Moho@@YAXXZ
 0041d3c0 X sub_41D3C0
@@ -8353,14 +8353,14 @@
 004ec4f0 X sub_4EC4F0
 004ec530 X sub_4EC530
 004ec560 X sub_4EC560
-004ec590 X sub_4EC590
+004ec590 T Moho::VAxes3::VAxes3@<eax>(Moho::VAxes3 *result@<eax>, Wm3::Quaternion *a2@<ecx>)
 004ec6d0 X sub_4EC6D0
-004ec720 X sub_4EC720
-004ec850 X sub_4EC850
-004ecb60 X ??$Identity@VVAxes3@Moho@@@Moho@@YAABVVAxes3@0@XZ
+004ec720 T Moho::VAxes3::OrthoNormalize(Moho::VAxes3 *a1@<esi>)
+004ec850 T Moho::VAxes3::IsNormal@<eax>(Moho::VAxes3 *a1@<eax>)
+004ecb60 T Moho::VAxes3 *Moho::Identity<Moho::VAxes3>()
 004ecbd0 X sub_4ECBD0
-004ece70 X sub_4ECE70
-004ecea0 X sub_4ECEA0
+004ece70 U Moho::ToString@<eax>(Wm3::Vector2f *a1@<eax>, std::string *a2@<esi>)
+004ecea0 T Moho::ToString@<eax>(Wm3::Vector3 *a1@<eax>, std::string *a2@<esi>)
 004eced0 X sub_4ECED0
 004ecf10 X sub_4ECF10
 004ecfd0 X sub_4ECFD0
@@ -8573,8 +8573,8 @@
 004f38f0 X sub_4F38F0
 004f3990 X sub_4F3990
 004f39b0 X sub_4F39B0
-004f3a60 X ?WINX_Exit@Moho@@YAXXZ
-004f3b60 X sub_4F3B60
+004f3a60 O Moho::WINX_Exit()
+004f3b60 O Moho::WINX_Printf@<eax>(void **a1@<esi>, const char *a2, ...)
 004f3cd0 X sub_4F3CD0
 004f3ce0 X sub_4F3CE0
 004f3f30 X ?WINX_ExitSplash@Moho@@YAXXZ
@@ -11731,7 +11731,7 @@
 0054b5f0 X sub_54B5F0
 0054b6d0 X sub_54B6D0
 0054b770 X sub_54B770
-0054b990 X sub_54B990
+0054b990 T Moho::CAniPose::MarkBoneDirty@<eax>(int idx@<ecx>, Moho::CAniPose *this@<esi>)
 0054ba00 X sub_54BA00
 0054ba10 X sub_54BA10
 0054ba60 X sub_54BA60
@@ -11741,7 +11741,7 @@
 0054bb40 X sub_54BB40
 0054bb50 X sub_54BB50
 0054bbf0 X nullsub_1282
-0054bc00 X sub_54BC00
+0054bc00 T Moho::CAniPoseBone::Rotate@<eax>(Moho::CAniPoseBone *this@<eax>, Wm3::Quaternion *a2@<ecx>)
 0054bd30 X sub_54BD30
 0054bd80 X sub_54BD80
 0054bdd0 X ?SetLocalTransform@CAniPoseBone@Moho@@QAEXABVVTransform@2@@Z
@@ -18640,7 +18640,7 @@
 00630750 X sub_630750
 00630760 X sub_630760
 006309f0 X sub_6309F0
-00630cb0 X sub_630CB0
+00630cb0 T Moho::CAimManipulator::SetFiringArc
 00630db0 X sub_630DB0
 00631190 X sub_631190
 00631220 X sub_631220
@@ -31610,7 +31610,7 @@
 007de930 X sub_7DE930
 007dea30 X sub_7DEA30
 007dec80 X Moho__MeshInstance__UpdateInterpolatedFields
-007def60 X sub_7DEF60
+007def60 T Wm3::Box3f::Copy@<eax>(Wm3::Box3f *result@<eax>, Wm3::Box3f *a2@<ecx>)
 007defc0 X sub_7DEFC0
 007df140 X ?ResetBatches@MeshInstance@Moho@@QAEXXZ
 007df150 X sub_7DF150
