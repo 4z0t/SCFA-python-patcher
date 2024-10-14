@@ -135,12 +135,48 @@
 004F3B60 004F3C30 O Moho::WINX_Printf@<eax>(void **a1@<esi>, const char *a2, ...)
 
 #rendering
+
+
+00438310 00438460 N Moho::CD3DPrimBatcher::CD3DPrimBatcher
+00438460 00438560 N Moho::CD3DPrimBatcher::~CD3DPrimBatcher
 00438560 004385A0 T Moho::CD3DPrimBatcher::Setup(Moho::CD3DPrimBatcher *a1, const char *Technique)
 004385A0 004385F0 T Moho::CD3DPrimBatcher::SetViewMatrix(        Moho::CD3DPrimBatcher *this@<ecx>,        Moho::CD3DPrimBatcher *a2@<ebx>,        const struct Moho::VMatrix4 *a3)
 004385F0 00438640 T Moho::CD3DPrimBatcher::SetProjectionMatrix(        Moho::CD3DPrimBatcher *a1@<ebx>,        const struct Moho::VMatrix4 *a2)
 00438640 004386A0 T Moho::CD3DPrimBatcher::SetViewProjMatrix(        Moho::CD3DPrimBatcher *this@<ecx>,        Moho::CD3DPrimBatcher *a2@<ebx>,        const struct Moho::GeomCamera3 *a3)
-
+004386A0 00438870 N Moho::CD3DPrimBatcher::SetTexture(        Moho::WeakPtr_CD3DBatchTexture *a1@<ebx>,        Moho::CD3DPrimBatcher *a3@<edi>)
 00438870 004389A0 T Moho::CD3DPrimBatcher::SetTexture(        Moho::CD3DPrimBatcher *a1@<esi>,        Moho::CD3DDynamicTextureSheet *a2,        boost::detail::sp_counted_impl_p *a3)
-004389A0 00438DA0 T Moho::CD3DPrimBatcher::DrawQuad(Moho::CD3DPrimBatcher *this@<ecx>,const struct Moho::CD3DPrimBatcher::Vertex *a2@<eax>,const struct Moho::CD3DPrimBatcher::Vertex *a3,const struct Moho::CD3DPrimBatcher::Vertex *a4,const struct Moho::CD3DPrimBatcher::Vertex *a5)
+004389A0 00438DA0 R Moho::CD3DPrimBatcher::DrawQuad(Moho::CD3DPrimBatcher *this@<ecx>,const struct Moho::CD3DPrimBatcher::Vertex *a2@<eax>,const struct Moho::CD3DPrimBatcher::Vertex *a3,const struct Moho::CD3DPrimBatcher::Vertex *a4,const struct Moho::CD3DPrimBatcher::Vertex *a5)
 00438DA0 00438EA0 T Moho::CD3DPrimBatcher::DrawQuad(uint32_t color@<eax>,Wm3::Vector3f *a2@<edx>,Wm3::Vector3f *a3@<ecx>,Wm3::Vector3f *a5@<esi>,Moho::CD3DPrimBatcher *a6,Wm3::Vector3f *a7)
+00438EA0 00438EF0 U ?
+00438EF0 00438F50 U ?
+00438F50 00439260 U Moho::CD3DPrimBatcher::DrawTri
+00439260 004392C0 U ?
+004392C0 004394D0 R Moho::CD3DPrimBatcher::DrawLine
+004394D0 00439520 U ?
+00439520 00439580 U ?
+00439580 004396E0 U Moho::CD3DPrimBatcher::DrawPoint
+004396E0 00439730 U ?
+00439730 00439790 U ?
+00439790 00439B60 N Moho::CD3DPrimBatcher::AddVerts
+00439B60 00439BD0 U Moho::CD3DPrimBatcher::AddVert
+00439BD0 0043A060 N Moho::CD3DPrimBatcher::AddIndexedVerts(        Moho::CD3DPrimBatcher::Vertex *this,        Moho::CD3DPrimBatcher *a5,        Moho::CD3DPrimBatcher::Vertex *a3,        const unsigned __int16 *size,        unsigned int argC,        unsigned int a6,        unsigned int a7)
+0043A060 0043A140 N Moho::CD3DPrimBatcher::AddIndexedVert@<ax>(        Moho::CD3DPrimBatcher *a1@<ecx>,        unsigned __int16 a2@<si>,        Moho::CD3DPrimBatcher::Vertex *a3,        _DWORD *a4)
+0043A140 0043A430 N Moho::CD3DPrimBatcher::Flush
+0043A430 0043A440 U ?
+0043A440 0043A550 T gpg::fastvector_CD3DPrimBatcher_Vertex_resize_to_0x8000
+0043A550 0043A570 T gpg::fastvector_CD3DPrimBatcher_Vertex_Size
+0043A570 0043A5B0 T gpg::fastvector_CD3DPrimBatcher_Vertex_Empty
+0043A5B0 0043A5C0 U gpg::fastvector_CD3DPrimBatcher_Vertex_begin
+0043A5C0 0043A650 T gpg::fastvector_CD3DPrimBatcher_Vertex_push_back
+0043A650 0043A680 U gpg::fastvector_CD3DPrimBatcher_Vertex_clear
+0043A680 0043A690 U gpg::fastvector_CD3DPrimBatcher_Vertex_ctor
+0043A6C0 0043A780 T gpg::fastvector_short_resize_to_0x8000
+0043A780 0043A7A0 U gpg::fastvector_short_size
+0043A7A0 0043A7D0 U gpg::fastvector_short_empty
+0043A7D0 0043A7E0 U gpg::fastvector_short_begin
+0043A7E0 0043A830 U ?
+0043A830 0043A860 U gpg::fastvector_short_clear
+0043A860 0043A8B0 T Moho::WeakPtr_CD3DDynamicTextureSheet::Release
+0043A8B0 0043A900 T Moho::WeakPtr_CD3DBatchTexture::Release
+
 
