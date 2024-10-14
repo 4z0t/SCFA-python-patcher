@@ -2264,14 +2264,14 @@
 004382b0 X sub_4382B0
 00438310 X ??0CD3DPrimBatcher@Moho@@QAE@PAVCD3DTextureBatcher@1@@Z
 00438460 X sub_438460
-00438560 X Moho::CD3DPrimBatcher::Setup(gpg::StrArg)
-004385a0 X Moho::CD3DPrimBatcher::SetViewMatrix(Moho::VMatrix4 const &)
-004385f0 X Moho::CD3DPrimBatcher::SetProjectionMatrix(Moho::VMatrix4 const &)
-00438640 X Moho::CD3DPrimBatcher::SetViewProjMatrix(Moho::GeomCamera3 const &)
+00438560 T Moho::CD3DPrimBatcher::Setup(Moho::CD3DPrimBatcher *a1, const char *Technique)
+004385a0 T Moho::CD3DPrimBatcher::SetViewMatrix(        Moho::CD3DPrimBatcher *this@<ecx>,        Moho::CD3DPrimBatcher *a2@<ebx>,        const struct Moho::VMatrix4 *a3)
+004385f0 T Moho::CD3DPrimBatcher::SetProjectionMatrix(        Moho::CD3DPrimBatcher *a1@<ebx>,        const struct Moho::VMatrix4 *a2)
+00438640 T Moho::CD3DPrimBatcher::SetViewProjMatrix(        Moho::CD3DPrimBatcher *this@<ecx>,        Moho::CD3DPrimBatcher *a2@<ebx>,        const struct Moho::GeomCamera3 *a3)
 004386a0 X Moho::CD3DPrimBatcher::SetTexture(boost::shared_ptr<Moho::CD3DBatchTexture> const &)
-00438870 X sub_438870
-004389a0 X Moho::CD3DPrimBatcher::DrawQuad(Moho::CD3DPrimBatcher::Vertex const &,Moho::CD3DPrimBatcher::Vertex const &,Moho::CD3DPrimBatcher::Vertex const &,Moho::CD3DPrimBatcher::Vertex const &)
-00438da0 X Moho::CD3DPrimBatcher::DrawQuad(Wm3::Vector3<float> const &,Wm3::Vector3<float> const &,Wm3::Vector3<float> const &,Wm3::Vector3<float> const &,uint)
+00438870 T Moho::CD3DPrimBatcher::SetTexture(        Moho::CD3DPrimBatcher *a1@<esi>,        Moho::CD3DDynamicTextureSheet *a2,        boost::detail::sp_counted_impl_p *a3)
+004389a0 T Moho::CD3DPrimBatcher::DrawQuad(Moho::CD3DPrimBatcher *this@<ecx>,const struct Moho::CD3DPrimBatcher::Vertex *a2@<eax>,const struct Moho::CD3DPrimBatcher::Vertex *a3,const struct Moho::CD3DPrimBatcher::Vertex *a4,const struct Moho::CD3DPrimBatcher::Vertex *a5)
+00438da0 T Moho::CD3DPrimBatcher::DrawQuad(uint32_t color@<eax>,Wm3::Vector3f *a2@<edx>,Wm3::Vector3f *a3@<ecx>,Wm3::Vector3f *a5@<esi>,Moho::CD3DPrimBatcher *a6,Wm3::Vector3f *a7)
 00438f50 X sub_438F50
 004392c0 X Moho::CD3DPrimBatcher::DrawLine(Moho::CD3DPrimBatcher::Vertex const &,Moho::CD3DPrimBatcher::Vertex const &)
 00439580 X sub_439580
