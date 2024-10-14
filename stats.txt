@@ -198,4 +198,8 @@
 #0043B360 
 
 
+0043BCA0 0043BCF0 U ?
+0043BCF0 0043BD40 T gpg::fastvector_CD3DPrimBatcher_Vertex_insert_many
+
+
 

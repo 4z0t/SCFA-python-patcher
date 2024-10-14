@@ -2385,9 +2385,9 @@
 0043bc50 X sub_43BC50
 0043bc80 X nullsub_269
 0043bc90 X sub_43BC90
-0043bca0 X sub_43BCA0
+0043bca0 U ?
 0043bce0 X nullsub_270
-0043bcf0 X vec_insert_n_times
+0043bcf0 T gpg::fastvector_CD3DPrimBatcher_Vertex_insert_many
 0043bd30 X nullsub_271
 0043bd40 X sub_43BD40
 0043bd50 X ?_Exp@?$_Ctraits@N@std@@SAFPANNF@Z
