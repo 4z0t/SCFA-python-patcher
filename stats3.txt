@@ -7365,9 +7365,9 @@
 004d2f70 X sub_4D2F70
 004d3060 X ??1MemBufferStream@gpg@@UAE@XZ
 004d3110 X sub_4D3110
-004d3250 X import_file
+004d3250 R Moho::SCR_Import(LuaPlus::LuaObject *a1, LuaPlus::LuaState *a2, char *s)
 004d3370 X ?SCR_ModuleExists@Moho@@YA_NPAVLuaState@LuaPlus@@VStrArg@gpg@@@Z
-004d33a0 X sub_4D33A0
+004d33a0 T LuaObject::GetErroMessage(std::string *a1, LuaPlus::LuaState *a2, char *s)
 004d3470 X sub_4D3470
 004d3490 X sub_4D3490
 004d34f0 X sub_4D34F0

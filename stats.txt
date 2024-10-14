@@ -105,6 +105,9 @@
 004ECB60 004ECBD0 T Moho::VAxes3 *Moho::Identity<Moho::VAxes3>()
 004ECE70 004ECEA0 U Moho::ToString@<eax>(Wm3::Vector2f *a1@<eax>, std::string *a2@<esi>)
 004ECEA0 004ECED0 T Moho::ToString@<eax>(Wm3::Vector3 *a1@<eax>, std::string *a2@<esi>)
+004D3250 004D336F R Moho::SCR_Import(LuaPlus::LuaObject *a1, LuaPlus::LuaState *a2, char *s)
+004D33A0 004D3470 T LuaObject::GetErroMessage(std::string *a1, LuaPlus::LuaState *a2, char *s)
+
 
 
 # general
