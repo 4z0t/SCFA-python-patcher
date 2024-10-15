@@ -91,7 +91,7 @@ a1->l.next = &a1->l;
   a1->l.next = &a1->l;
 ```
 
-### map (binary tree)
+### std::map (binary tree)
 
 ```cpp
 v1 = sub_465480();                                              // this function has weird stuff and call to *new* with size we'll use later
@@ -125,4 +125,31 @@ operator delete(this->m.root);
 this->m.root = 0;
 this->m.size = 0;
 ...
+```
+
+### std::shared_ptr
+
+```cpp
+if ( v10 )
+{
+  if ( !_InterlockedExchangeAdd(v10 + 1, 0xFFFFFFFF) )
+  {
+    (*(void (__thiscall **)(volatile signed __int32 *))(*v10 + 4))(v10);
+    if ( !_InterlockedExchangeAdd(v10 + 2, 0xFFFFFFFF) )
+      (*(void (__thiscall **)(volatile signed __int32 *))(*v10 + 8))(v10);
+  }
+}
+```
+You'll see this very frequently. It is inlined dtor of shared pointer. So if `v10` is a counter block, then field before it is pointer to data associated with it.
+
+```cpp
+if ( pi )
+  {
+    if ( !_InterlockedExchangeAdd(&pi->use_count_, 0xFFFFFFFF) )
+    {
+      pi->vtable->dispose(pi);
+      if ( !_InterlockedExchangeAdd(&pi->weak_count_, 0xFFFFFFFF) )
+        pi->vtable->destroy(pi);
+    }
+  }
 ```
