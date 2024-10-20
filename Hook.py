@@ -34,9 +34,10 @@ class Hook:
 
     def to_cpp(self):
         s = '#include "../asm.h"\n#include "../define.h"\n'
-        sections_lines = (section.to_cpp(i).split("\n")
-                          for i, section in enumerate(self._sections))
-        s += f"asm(\n{''.join((f"    {line}\n" for lines in sections_lines for line in lines))});"
+        if len(self._sections) > 0:
+            sections_lines = (section.to_cpp(i).split("\n")
+                              for i, section in enumerate(self._sections))
+            s += f"asm(\n{''.join((f"    {line}\n" for lines in sections_lines for line in lines))});"
         return s
 
 
@@ -55,10 +56,12 @@ def load_hook(file_path: Path) -> Hook:
                 continue
 
             if match := ADDRESS_RE.match(line):
-                sections.append(Section(address, lines))
+                if len(lines) > 0:
+                    sections.append(Section(address, lines))
                 lines = []
                 address = match.group(1)
                 continue
             lines.append(line)
-        sections.append(Section(address, lines))
+        if len(lines) > 0:
+            sections.append(Section(address, lines))
         return Hook(sections)
