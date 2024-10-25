@@ -9,11 +9,14 @@ import itertools
 import Hook
 
 
-CLANG_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -nostartfiles -w -masm=intel -std=c++20 -march=core2 -c",
+CLANG_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -Werror -masm=intel -std=c++20 -march=core2 -c",
                         ])
 
-GCC_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
+GCC_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
                       ])
+
+GCC_FLAGS_ASM = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
+                          ])
 SECT_SIZE = 0x80000
 
 ASM_RE = re.compile(r"(asm\(\"(0[xX][0-9a-fA-F]{1,8})\"\);)", re.IGNORECASE)
@@ -391,7 +394,7 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
 
     if run_system(
             f"""cd {build_folder_path} &
-            {gcc_compiler_path} -c {GCC_FLAGS} ../hooks/*.cpp"""):
+            {gcc_compiler_path} -c {GCC_FLAGS_ASM} ../hooks/*.cpp"""):
         raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
