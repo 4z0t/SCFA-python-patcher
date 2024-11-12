@@ -67,12 +67,21 @@ def load_sect_map(map_path: Path) -> list[tuple[int, str]]:
     return map
 
 
+def can_convert_to_hex(num: str):
+    try:
+        int(num, 16)
+        return True
+    except ValueError:
+        return False
+
+
 def get_stack_trace(data: list[str]) -> list[int]:
     stack_trace = []
     for line in data:
         if line.startswith("Stacktrace:"):
             _, * trace = line.split(" ")
-            stack_trace.extend((int(i, 16) for i in trace))
+            stack_trace.extend((int(i, 16)
+                               for i in trace if can_convert_to_hex(i)))
             break
     return stack_trace
 

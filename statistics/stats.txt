@@ -1,0 +1,205 @@
+# LuaObject
+009072F0 00907310 R LuaPlus::LuaObject::IsNil(LuaPlus::LuaObject *this)
+00907310 00907320 R LuaObject::IsTable(LuaPlus::LuaObject *this)
+00907320 00907340 R LuaPlus::LuaObject::IsUserData(LuaPlus::LuaObject *this)
+00907340 00907350 R LuaObject::IsCFunction(LuaPlus::LuaObject *this)
+00907580 009075A0 R LuaObject::RemoveFromUsedList
+009075A0 009075D0 U ?
+009075D0 009075F0 R LuaPlus::LuaObject::~LuaObject(LuaPlus::LuaObject *this)
+009075F0 00907610 R LuaPlus::LuaObject::Reset(LuaPlus::LuaObject *this)
+009072A0 009072B0 R LuaPlus::LuaObject::LuaObject(LuaPlus::LuaObject *this)
+00908810 00908890 R LuaPlus::LuaObject::SetObject
+009089C0 009089F0 R LuaObject::LuaObject(LuaState *state, int index)
+009089F0 00908A40 R LuaObject::LuaObject(LuaState *state, const TObject *obj)
+00908A40 00908A70 R LuaObject::LuaObject(const LuaObject &obj)
+00908AB0 00908B00 R LuaPlus::LuaObject::operator=(LuaPlus::LuaObject *this, LuaPlus::LuaObject *obj)
+00908B00 00908B50 R LuaPlus::LuaObject::operator=(LuaPlus::LuaObject *this, LuaPlus::LuaStackObject *a2)
+00908B50 00908BA0 R LuaPlus::LuaObject::TypeName
+00908DF0 00908E70 R LuaPlus::LuaObject::GetByIndex
+00908E70 00908EE0 R LuaPlus::LuaObject::GetByObject
+00909AF0 00909CE0 R LuaPlus::LuaObject::Insert
+00909CE0 00909EB0 R LuaPlus::LuaObject::Insert2
+00909EB0 0090A020 U LuaPlus::LuaObject::Remove
+0090A020 0090A160 U LuaPlus::LuaObject::Sort
+0090A180 0090A410 U LuaPlus::LuaObject::Clone
+0090A410 0090A4C0 R LuaPlus::LuaObject::GetTableCount(LuaPlus::LuaObject *this)
+0090A4C0 0090A4D0 U ?
+0090A4D0 0090A510 U ?
+
+# Lua State
+0090A510 0090A520 T LuaPlus::LuaState::CastState(lua::lua_State *state)
+0090A520 0090A5D0 T LuaPlus::LuaState::LuaState(LuaPlus::LuaState *this, LuaPlus::LuaState *a2)
+0090A5D0 0090A600 T LuaState::LuaState(LuaPlus::LuaState *this, int a2)
+0090A600 0090A690 T LuaPlus::LuaState::~LuaState(LuaPlus::LuaState *this)
+0090A690 0090A6B0 T LuaPlus::LuaState::GetGlobals(LuaPlus::LuaState *this, LuaPlus::LuaObject *dest)
+0090A6B0 0090A780 T LuaPlusH_next(LuaPlus::LuaState *state,LuaPlus::LuaObject *table,LuaPlus::LuaObject *key,LuaPlus::LuaObject *value)
+0090A780 0090A7D0 N userGCFunction(lua::GCState *a1)
+0090A7D0 0090A8C0 N sub_90A7D0(LuaPlus::LuaState *stateUserData, lua::lua_State *L)
+0090A8C0 0090AAD0 N LS_LOG()
+0090AAD0 0090AC10 T LuaState::Init(LuaPlus::LuaState *this, StandardLibraries initStandardLibrary)
+0090AC10 0090ACB0 T LuaPlus::LuaState::LuaState(LuaPlus::LuaState *this, StandardLibraries a2)
+0090ACB0 0090AD00 U ?
+0090AD00 0090AD30 T lua_setdefaultmetatable(lua::lua_State *L, int type)
+0090AD30 0090AE00 T lua_getn(lua::lua_State *L, int index)
+0090AE00 0090AE30 U ?
+0090AE30 0090AE70 U sub_90AE30(lua::lua_State *L, int idx, void *a3)
+0090AE70 0090AF50 U ?
+0090AF50 0090AF80 N sub_90AF50(int a1, void *Buffer, size_t ElementSize, FILE *Stream)
+0090AF80 0090AFB0 T LS_import(lua::lua_State *state)
+0090AFB0 0090B0D0 T LS_dump(LuaPlus::LuaState *a1)
+0090B0D0 0090B150 T ScriptFunctionsRegister(LuaPlus::LuaState *state)
+0090B150 0090B1C0 U ?
+0090B1C0 0090B1E0 T LuaPlus::LuaState::Dtor(LuaPlus::LuaState *a1)
+0090B1E0 0090B380 N ?
+
+0090BEE0 0090BEF0 T LuaPlus::LuaState::GetActiveState(LuaPlus::LuaState *this)
+0090BEF0 0090BF00 T LuaPlus::LuaState::GetActiveCState(LuaPlus::LuaState *this)
+0090BF70 0090BF7D T LuaState::ArgError(LuaPlus::LuaState *this, int narg, const char *extramsg)
+0090C1D0 0090C1EA T LuaPlus::LuaState::Error(LuaPlus::LuaState *this, char *fmt, ...)
+0090C340 0090C3D0 T negindex(lua::lua_State *L, int idx)
+0090C3D0 0090C3E8 T luaA_index(lua::lua_State *L, int idx)
+0090C420 0090C451 T luaA_pushobject(lua::lua_State *L, const lua::TObject *o)
+0090C460 0090C4B4 T lua_checkstack(lua::lua_State *L, int size)
+0090C4C0 0090C526 T lua_xmove(lua::lua_State *from, lua::lua_State *to, int n)
+0090C530 0090C58F T lua_newthread(lua::lua_State *L)
+0090C590 0090C59D T lua_gettop(lua::lua_State *L)
+0090C5A0 0090C5EC T lua_settop(lua::lua_State *L, int idx)
+0090C5F0 0090C640 T lua_remove(lua::lua_State *L, int idx)
+0090C640 0090C690 T lua_insert(lua::lua_State *L, int idx)
+0090C690 0090C6E0 T lua_replace(lua::lua_State *L, int idx)
+0090C6E0 0090C740 T lua_pushvalue(lua::lua_State *L, int idx)
+0090C740 0090C780 T lua_type(lua::lua_State *L, int idx)
+0090C780 0090C7A0 T lua_typename(lua::lua_State *L, enum_LuaObjType t)
+0090C7A0 0090C800 T lua_isnumber(lua::lua_State *L, int idx)
+0090C800 0090C850 T lua_isstring(lua::lua_State *L, int idx)
+0090C850 0090C890 T lua_isuserdata(lua::lua_State *a1, int a2)
+0090C890 0090C900 T lua_rawequal(lua::lua_State *L, int index1, int index2)
+0090C900 0090C980 T lua_equal(lua::lua_State *a1, int a2, int idx)
+
+
+00431390 004313C0 R std::wstring::~wstring(wstring *this)
+004313C0 004313D0 R wstring::c_str(wstring *this)
+
+00457BA0 00457BF9 R LuaPlus::LuaTableIterator::Next(LuaPlus::LuaTableIterator *this)
+00457C30 00457C62 R LuaPlus::LuaTableIterator::GetValue(LuaPlus::LuaTableIterator *this)
+00457A40 00457B10 R LuaPlus::LuaTableIterator::LuaTableIterator(LuaPlus::LuaTableIterator *this,LuaPlus::LuaObject *tableObj,char doReset)
+00457B10 00457B60 R LuaPlus::LuaTableIterator::~LuaTableIterator(LuaPlus::LuaTableIterator *this)
+00457B60 00457BA0 R TableIterator::Reset_(LuaPlus::LuaTableIterator *this)
+004A4F30 004A4F70 R LuaPlus::LuaTableIterator::GetKey(LuaPlus::LuaTableIterator *this)
+
+#moho
+
+0041BFF0 0041C3B5 N Moho::CON_ParseCommand(const char *a1, std::string **a2, std::string *a3)
+0041C990 0041CB60 N Moho::CON_Printf(const char *fmt, ...)
+0041CBE0 0041CC60 T cfunc_ConExecuteL@<eax>(LuaPlus::LuaState *a1@<eax>)
+0041D100 0041D180 T Moho::CON_Executef(const char *a1, ...)
+0041D200 0041D270 T cfunc_ConExecuteSaveL@<eax>(LuaPlus::LuaState *a1@<esi>)
+
+00630CB0 00630DB0 T Moho::CAimManipulator::SetFiringArc
+0054BC00 0054BD30 T Moho::CAniPoseBone::Rotate@<eax>(Moho::CAniPoseBone *this@<eax>, Wm3::Quaternion *a2@<ecx>)
+0054B990 0054BA00 T Moho::CAniPose::MarkBoneDirty@<eax>(int idx@<ecx>, Moho::CAniPose *this@<esi>)
+007DEF60 007DEFC0 T Wm3::Box3f::Copy@<eax>(Wm3::Box3f *result@<eax>, Wm3::Box3f *a2@<ecx>)
+004EC590 004EC6D0 T Moho::VAxes3::VAxes3@<eax>(Moho::VAxes3 *result@<eax>, Wm3::Quaternion *a2@<ecx>)
+004EC720 004EC850 T Moho::VAxes3::OrthoNormalize(Moho::VAxes3 *a1@<esi>)
+004EC850 004EC9C6 T Moho::VAxes3::IsNormal@<eax>(Moho::VAxes3 *a1@<eax>)
+004ECB60 004ECBD0 T Moho::VAxes3 *Moho::Identity<Moho::VAxes3>()
+004ECE70 004ECEA0 U Moho::ToString@<eax>(Wm3::Vector2f *a1@<eax>, std::string *a2@<esi>)
+004ECEA0 004ECED0 T Moho::ToString@<eax>(Wm3::Vector3 *a1@<eax>, std::string *a2@<esi>)
+004D3250 004D336F R Moho::SCR_Import(LuaPlus::LuaObject *a1, LuaPlus::LuaState *a2, char *s)
+004D33A0 004D3470 T LuaObject::GetErroMessage(std::string *a1, LuaPlus::LuaState *a2, char *s)
+
+
+
+# general
+00958B20 00958C40 O malloc
+00958C40 00958D60 O free
+00958D60 00958DC0 O getheapinfo
+00957EA0 00957EF0 O msize
+00A825B9 00A8262F O new
+00957B00 00957BA0 O realloc
+00A89110 00A89190 O memset
+00A89190 00A89525 O memcpy
+00A96630 00A966B8 O strcmp
+00A94450 00A944E0 O strlen
+00A89950 00A899A0 O CxxThrowException
+
+# win
+004F2730 004F2800 O Moho::WIN_CopyToClipboard(const wchar_t*)
+004F2800 004F2900 O Moho::WIN_OkBox(const char *caption, const char *text)
+004F2900 004F2A00 O Moho::WIN_YesNoBox(const char *a1, const char *a2)
+004F2A00 004F2B40 O Moho::WIN_GetLastError(std::string *a1)
+004F2B40 004F2B50 O Moho::WIN_AppRequestExit()
+
+
+004F3A60 004F3B60 O Moho::WINX_Exit()
+004F3B60 004F3C30 O Moho::WINX_Printf@<eax>(void **a1@<esi>, const char *a2, ...)
+
+#rendering
+
+
+00438310 00438460 N Moho::CD3DPrimBatcher::CD3DPrimBatcher
+00438460 00438560 N Moho::CD3DPrimBatcher::~CD3DPrimBatcher
+00438560 004385A0 T Moho::CD3DPrimBatcher::Setup(Moho::CD3DPrimBatcher *a1, const char *Technique)
+004385A0 004385F0 T Moho::CD3DPrimBatcher::SetViewMatrix(        Moho::CD3DPrimBatcher *this@<ecx>,        Moho::CD3DPrimBatcher *a2@<ebx>,        const struct Moho::VMatrix4 *a3)
+004385F0 00438640 T Moho::CD3DPrimBatcher::SetProjectionMatrix(        Moho::CD3DPrimBatcher *a1@<ebx>,        const struct Moho::VMatrix4 *a2)
+00438640 004386A0 T Moho::CD3DPrimBatcher::SetViewProjMatrix(        Moho::CD3DPrimBatcher *this@<ecx>,        Moho::CD3DPrimBatcher *a2@<ebx>,        const struct Moho::GeomCamera3 *a3)
+004386A0 00438870 N Moho::CD3DPrimBatcher::SetTexture(        Moho::WeakPtr_CD3DBatchTexture *a1@<ebx>,        Moho::CD3DPrimBatcher *a3@<edi>)
+00438870 004389A0 T Moho::CD3DPrimBatcher::SetTexture(        Moho::CD3DPrimBatcher *a1@<esi>,        Moho::CD3DDynamicTextureSheet *a2,        boost::detail::sp_counted_impl_p *a3)
+004389A0 00438DA0 R Moho::CD3DPrimBatcher::DrawQuad(Moho::CD3DPrimBatcher *this@<ecx>,const struct Moho::CD3DPrimBatcher::Vertex *a2@<eax>,const struct Moho::CD3DPrimBatcher::Vertex *a3,const struct Moho::CD3DPrimBatcher::Vertex *a4,const struct Moho::CD3DPrimBatcher::Vertex *a5)
+00438DA0 00438EA0 T Moho::CD3DPrimBatcher::DrawQuad(uint32_t color@<eax>,Wm3::Vector3f *a2@<edx>,Wm3::Vector3f *a3@<ecx>,Wm3::Vector3f *a5@<esi>,Moho::CD3DPrimBatcher *a6,Wm3::Vector3f *a7)
+00438EA0 00438EF0 U ?
+00438EF0 00438F50 U ?
+00438F50 00439260 U Moho::CD3DPrimBatcher::DrawTri
+00439260 004392C0 U ?
+004392C0 004394D0 R Moho::CD3DPrimBatcher::DrawLine
+004394D0 00439520 U ?
+00439520 00439580 U ?
+00439580 004396E0 U Moho::CD3DPrimBatcher::DrawPoint
+004396E0 00439730 U ?
+00439730 00439790 U ?
+00439790 00439B60 N Moho::CD3DPrimBatcher::AddVerts
+00439B60 00439BD0 U Moho::CD3DPrimBatcher::AddVert
+00439BD0 0043A060 N Moho::CD3DPrimBatcher::AddIndexedVerts(        Moho::CD3DPrimBatcher::Vertex *this,        Moho::CD3DPrimBatcher *a5,        Moho::CD3DPrimBatcher::Vertex *a3,        const unsigned __int16 *size,        unsigned int argC,        unsigned int a6,        unsigned int a7)
+0043A060 0043A140 N Moho::CD3DPrimBatcher::AddIndexedVert@<ax>(        Moho::CD3DPrimBatcher *a1@<ecx>,        unsigned __int16 a2@<si>,        Moho::CD3DPrimBatcher::Vertex *a3,        _DWORD *a4)
+0043A140 0043A430 N Moho::CD3DPrimBatcher::Flush
+0043A430 0043A440 U ?
+0043A440 0043A550 T gpg::fastvector_CD3DPrimBatcher_Vertex_resize_to_0x8000
+0043A550 0043A570 T gpg::fastvector_CD3DPrimBatcher_Vertex_Size
+0043A570 0043A5B0 T gpg::fastvector_CD3DPrimBatcher_Vertex_Empty
+0043A5B0 0043A5C0 U gpg::fastvector_CD3DPrimBatcher_Vertex_begin
+0043A5C0 0043A650 T gpg::fastvector_CD3DPrimBatcher_Vertex_push_back
+0043A650 0043A680 U gpg::fastvector_CD3DPrimBatcher_Vertex_clear
+0043A680 0043A690 U gpg::fastvector_CD3DPrimBatcher_Vertex_ctor
+0043A6C0 0043A780 T gpg::fastvector_short_resize_to_0x8000
+0043A780 0043A7A0 U gpg::fastvector_short_size
+0043A7A0 0043A7D0 U gpg::fastvector_short_empty
+0043A7D0 0043A7E0 U gpg::fastvector_short_begin
+0043A7E0 0043A830 U ?
+0043A830 0043A860 U gpg::fastvector_short_clear
+0043A860 0043A8B0 T Moho::WeakPtr_CD3DDynamicTextureSheet::Release
+0043A8B0 0043A900 T Moho::WeakPtr_CD3DBatchTexture::Release
+0043AB40 0043ABB0 T gpg::fastvector_CD3DPrimBatcher_Vertex_insert_at
+0043ABB0 0043ABF0 U ?
+0043ABF0 0043AC50 U ?ctor
+0043AC50 0043AC80 U ?dtor
+0043AC80 0043ACA0 T ?
+0043ACA0 0043AD30 T gpg::fastvector_CD3DPrimBatcher_Vertex_XLength
+0043AD30 0043AD40 U ?
+0043AD40 0043AD60 U ?
+0043AD60 0043AD80 U ?
+
+0043ADB0 0043ADF0 U ?
+0043ADF0 0043AE30 U ?
+0043AE30 0043AE90 U ?
+0043AE90 0043AEC0 U ?
+0043AEC0 0043AEF0 T ?
+0043AEF0 0043AF80 T gpg::fastvector_short_XLength
+0043B090 0043B360 T gpg::fastvector_CD3DPrimBatcher_Vertex_insert_at_0
+#0043B360 
+
+
+0043BCA0 0043BCF0 U ?
+0043BCF0 0043BD40 T gpg::fastvector_CD3DPrimBatcher_Vertex_insert_many
+
+
+
