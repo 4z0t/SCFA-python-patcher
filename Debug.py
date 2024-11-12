@@ -127,7 +127,7 @@ def main(patches_folder_path, args):
         else:
             break
 
-    exe_map = load_exe_map(Path("./exe.map"))
+    exe_map = load_exe_map(Path("./statistics/exe.map"))
     sect = load_sect_map(Path(patches_folder_path)/"build"/"sectmap.txt")
     exe_map.extend(sect)
 

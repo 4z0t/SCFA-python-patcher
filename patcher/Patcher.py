@@ -386,7 +386,9 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
     def generate_hook_files(folder_path: Path):
         for file_path in list_files_at(folder_path, "**/*.hook"):
             hook = Hook. load_hook(folder_path/file_path)
-            with open(folder_path/(Path(file_path).name+".cpp"), "w") as f:
+            hook_path = file_path.replace(os.sep, "_") + ".cpp"
+            print(f"Generating {hook_path}")
+            with open(folder_path/hook_path, "w") as f:
                 f.write(hook.to_cpp())
 
     generate_hook_files(target_path/"hooks")
