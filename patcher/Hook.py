@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-ADDRESS_RE = re.compile(r"^#(0[xX][0-9A-Fa-f]{6,8})\:$")
+ADDRESS_RE = re.compile(r"^(0[xX][0-9A-Fa-f]{6,8})\:$")
 FUNCTION_NAME_RE = re.compile(r"@([a-zA-Z\_][a-zA-Z0-9\_]+)")
 
 
@@ -49,8 +49,7 @@ def load_hook(file_path: Path) -> Hook:
         for line in f.readlines():
             # remove comments
             line = line.split("//")[0]
-            if not line.startswith("#"):
-                line = line.split("#")[0]
+            line = line.split("#")[0]
             line = line.strip()
             if not line:
                 continue
