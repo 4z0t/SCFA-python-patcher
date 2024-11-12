@@ -1,5 +1,5 @@
 name: Contribution template
-description: Template for an extensive description, to enable other contributors to discuss and implement on a feature of the patcher.
+description: Template for an extensive description, to enable other contributors to discuss about and implement a feature of the patcher.
 labels: ["status: novel issue"]
 
 body:
