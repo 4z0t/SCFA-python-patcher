@@ -41,12 +41,13 @@ jobs:
       # clone everything that we need
       - uses: actions/checkout@v4
         with:
-          path: fa-python-binary-patcher
+          repository: FAForever/FA-Binary-Patches
+          ref: 'master'
+          path: .
 
       - uses: actions/checkout@v4
         with:
-          repository: FAForever/FA-Binary-Patches
-          path: fa-binary-patches
+          path: fa-python-binary-patcher
 
       # install everything that we need
       - uses: actions/setup-python@v5
@@ -65,11 +66,11 @@ jobs:
 
       # download base executable
       - name: Download base executable
-        run: curl -L "https://content.faforever.com/build/ForgedAlliance_base.exe" -o ForgedAlliance_base.exe
+        run: | 
+          curl -L "https://content.faforever.com/build/ForgedAlliance_base.exe" -o ForgedAlliance_base.exe
 
       # patch it, if it works then we're good
       - name: Patch base executable
         run: |
-          echo "#define gitsha \"${{ github.sha }}\"" > workflow.cpp
           mkdir build
           python ./fa-python-binary-patcher/main.py "$(pwd)" clang++ ld g++
