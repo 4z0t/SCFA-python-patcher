@@ -1,13 +1,12 @@
-from PEData import PEData, PESect
-from COFFData import COFFData, COFFSect
+from .PEData import PEData, PESect
+from .COFFData import COFFData, COFFSect
 import os
 from pathlib import Path
 import re
 from typing import Optional
 import struct
 import itertools
-import Hook
-
+from patcher import Hook
 
 CLANG_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -Werror -masm=intel -std=c++20 -march=core2 -c",
                         ])

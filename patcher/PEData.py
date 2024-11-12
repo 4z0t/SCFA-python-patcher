@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, Any
 import struct
-from BasicBinaryParser import BasicBinaryParser
+from .BasicBinaryParser import BasicBinaryParser
 
 
 @dataclass
