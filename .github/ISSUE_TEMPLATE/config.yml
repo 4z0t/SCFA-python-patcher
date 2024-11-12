@@ -8,3 +8,7 @@ contact_links:
   - name: Looking for contributors
     url: https://discord.gg/Rnpv8RwhdU
     about: There's so much to do - we're always looking for contributors to help out with the project!
+  - name: Repository with assembly patches
+    url: https://github.com/FAForever/FA-Binary-Patches
+    about: This is where the actual assembly patches live and prosper to improve the FAForever experience.
+
