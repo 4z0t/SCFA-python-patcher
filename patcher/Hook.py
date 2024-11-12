@@ -17,7 +17,7 @@ class Section:
             line = line.translate(str.maketrans({"\"":  r"\"", "\\": r"\\", }))
 
             if FUNCTION_NAME_RE.findall(line):
-                line = FUNCTION_NAME_RE.sub(r'"QU(\1)"', line)
+                line = FUNCTION_NAME_RE.subn(r'"QU(\1)"', line)[0]
 
             s += f'"{line};"\n'
         return s
