@@ -1,18 +1,21 @@
-from PEData import PEData, PESect
-from COFFData import COFFData, COFFSect
+from .PEData import PEData, PESect
+from .COFFData import COFFData, COFFSect
 import os
 from pathlib import Path
 import re
 from typing import Optional
 import struct
 import itertools
+from patcher import Hook
 
-
-CLANG_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -nostartfiles -w -masm=intel -std=c++20 -march=core2 -c",
+CLANG_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -Werror -masm=intel -std=c++20 -march=core2 -c",
                         ])
 
-GCC_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
+GCC_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
                       ])
+
+GCC_FLAGS_ASM = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
+                          ])
 SECT_SIZE = 0x80000
 
 ASM_RE = re.compile(r"(asm\(\"(0[xX][0-9a-fA-F]{1,8})\"\);)", re.IGNORECASE)
@@ -380,9 +383,19 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
                 f.write(f"#define {name} {address}\n")
     create_defines_file(target_path / "define.h", addresses)
 
+    def generate_hook_files(folder_path: Path):
+        for file_path in list_files_at(folder_path, "**/*.hook"):
+            hook = Hook. load_hook(folder_path/file_path)
+            hook_path = file_path.replace(os.sep, "_") + ".cpp"
+            print(f"Generating {hook_path}")
+            with open(folder_path/hook_path, "w") as f:
+                f.write(hook.to_cpp())
+
+    generate_hook_files(target_path/"hooks")
+
     if run_system(
             f"""cd {build_folder_path} &
-            {gcc_compiler_path} -c {GCC_FLAGS} ../hooks/*.cpp"""):
+            {gcc_compiler_path} -c {GCC_FLAGS_ASM} ../hooks/*.cpp"""):
         raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
@@ -417,7 +430,7 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
         for hook in hooks:
             for sect in hook.sects:
                 pld.writelines([
-                    f" .h{hi} 0x{sect.offset:x} : SUBALIGN(1) {{\n",
+                    f" .h{hi:X} 0x{sect.offset:x} : SUBALIGN(1) {{\n",
                     f"     {hook.name}({sect.name})\n",
                     " }\n",
                 ])
@@ -457,7 +470,7 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
             print(f"No hooks in {hook.name}")
             continue
         for sect in hook.sects:
-            psect = patch_pe.find_sect(f".h{hi}")
+            psect = patch_pe.find_sect(f".h{hi:X}")
             size = sect.size
             replace_data(
                 patch_pe.data[psect.f_offset:psect.f_offset + size], psect.v_offset)
@@ -507,3 +520,4 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
     save_new_base_data(base_file_data)
 
     remove_files_at(build_folder_path, "**/*.o")
+    remove_files_at(target_path/"hooks", "*.hook.cpp")
