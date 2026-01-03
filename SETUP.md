@@ -14,10 +14,8 @@ Clang compiler installation:
 * You need path to `/bin/clang++.exe`
 
 GCC compiler installation:
-* Install [MSYS2](https://www.msys2.org/)
-* Install GCC x32/x64 via MSYS console:
-    * x32: pacman -S mingw-w64-i686-gcc
-    * x64: pacman -S mingw-w64-x86_64-gcc
+* Install [chocolatey](https://chocolatey.org/)
+* Run `choco install mingw --x86 -y --no-progress` which is gonna be installed at `C:\ProgramData\mingw64`.
 * You need paths to `/mingw32/bin/g++.exe` and `/mingw32/bin/ld.exe`
 
 After everything installed you need to clone patches repo (right now only 4z0t's fork is compatible).
