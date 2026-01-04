@@ -102,6 +102,7 @@ __ZdlPvj = 0x958C40;
 "___CxxFrameHandler3" = 0xA8958C;
 "___std_terminate" = 0xA994FB; /*idk addr*/
 "??_7type_info@@6B@" = 0xD72A88;
+"__CxxThrowException@8" = 0x00A89950;
     """
     SECTIONS = """
     SECTIONS {
