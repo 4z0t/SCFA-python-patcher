@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/FA-Binary-Patches/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.22621.0",
+            "cStandard": "c17",
+            "intelliSenseMode": "windows-clang-x86",
+            "compilerPath": "C:\\ProgramData\\mingw64\\mingw32\\bin\\g++.exe",
+            "cppStandard": "c++20"
+        }
+    ],
+    "version": 4
+}
