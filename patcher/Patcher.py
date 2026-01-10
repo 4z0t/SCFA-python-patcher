@@ -30,13 +30,6 @@ def load_compiler_config(config_path: Path):
     return compilers
 
 
-# Initialize default compiler flags from default config
-default_config_path = Path(__file__).parent / "compiler_config.json"
-default_compiler_flags = load_compiler_config(default_config_path)
-
-CLANG_FLAGS = default_compiler_flags.get("CLANG_FLAGS", "")
-GCC_FLAGS = default_compiler_flags.get("GCC_FLAGS", "")
-GCC_FLAGS_ASM = default_compiler_flags.get("GCC_FLAGS_ASM", "")
 SECT_SIZE = 0x80000
 
 ASM_RE = re.compile(r"(asm\(\"(0[xX][0-9a-fA-F]{1,8})\"\);)", re.IGNORECASE)
