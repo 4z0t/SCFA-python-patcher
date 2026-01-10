@@ -3,19 +3,40 @@ from .COFFData import COFFData, COFFSect
 import os
 from pathlib import Path
 import re
+import json
 from typing import Optional
 import struct
 import itertools
 from patcher import Hook
 
-CLANG_FLAGS = " ".join(["-pipe -m32 -Os -nostdlib -Werror -masm=intel -std=c++20 -march=core2 -c",
-                        ])
 
-GCC_FLAGS = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
-                      ])
+def load_compiler_config(config_path: Path):
+    """Load compiler configuration from JSON file."""
+    with open(config_path, 'r') as f:
+        config = json.load(f)
 
-GCC_FLAGS_ASM = " ".join(["-pipe -m32 -Os -fno-exceptions -nostdlib -nostartfiles -w -fpermissive -masm=intel -std=c++20 -march=core2 -mfpmath=both",
-                          ])
+    compilers = {}
+
+    compilers['CLANG_FLAGS'] = config.get("clang_flags", [])
+    compilers['GCC_FLAGS'] = config.get("gcc_flags", [])
+    compilers['ASM_FLAGS'] = config.get("asm_flags", [])
+
+    compilers['CLANG_COMPILER_PATH'] = config.get('clang', 'clang++')
+    compilers['GCC_COMPILER_PATH'] = config.get('gcc', 'gcc')
+    compilers['LINKER_PATH'] = config.get('linker', 'ld')
+
+    compilers["FUNCS"] = config.get("functions", {})
+
+    return compilers
+
+
+# Initialize default compiler flags from default config
+default_config_path = Path(__file__).parent / "compiler_config.json"
+default_compiler_flags = load_compiler_config(default_config_path)
+
+CLANG_FLAGS = default_compiler_flags.get("CLANG_FLAGS", "")
+GCC_FLAGS = default_compiler_flags.get("GCC_FLAGS", "")
+GCC_FLAGS_ASM = default_compiler_flags.get("GCC_FLAGS_ASM", "")
 SECT_SIZE = 0x80000
 
 ASM_RE = re.compile(r"(asm\(\"(0[xX][0-9a-fA-F]{1,8})\"\);)", re.IGNORECASE)
@@ -93,16 +114,6 @@ def create_sections_file(path: Path, address_map: dict[str, str]):
 OUTPUT_FORMAT(pei-i386)
 OUTPUT(section.pe)
     """
-    FUNC_NAMES = """
-_atexit  = 0xA8211E;
-__Znwj   = 0xA825B9;
-__ZdlPvj = 0x958C40;
-"__imp__GetModuleHandleA@4" = 0xC0F378;
-"__imp__GetProcAddress@8" = 0xC0F48C;
-"___CxxFrameHandler3" = 0xA8958C;
-"___std_terminate" = 0xA994FB; /*idk addr*/
-"??_7type_info@@6B@" = 0xD72A88;
-    """
     SECTIONS = """
     SECTIONS {
         . = __image_base__ + 0x1000;
@@ -132,7 +143,6 @@ __ZdlPvj = 0x958C40;
 
     with open(path, "w") as f:
         f.write(HEADER)
-        f.write(FUNC_NAMES)
         for name, address in address_map.items():
             f.write(f"\"{name}\" = {address};\n")
         f.write(SECTIONS)
@@ -307,7 +317,19 @@ def run_system(command: str) -> int:
     return os.system(command.replace("\n", " "))
 
 
-def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path, * args):
+def patch(config_path, target_folder):
+    config = load_compiler_config(Path(config_path))
+
+    clang_compiler_path = config.get('CLANG_COMPILER_PATH')
+    linker_path = config.get('LINKER_PATH')
+    gcc_compiler_path = config.get('GCC_COMPILER_PATH')
+
+    clang_flags = " ".join(config.get('CLANG_FLAGS', []))
+    gcc_flags = " ".join(config.get('GCC_FLAGS', []))
+    gcc_flags_asm = " ".join(config.get('ASM_FLAGS', []))
+
+    config_functions = config.get("FUNCS", {})
+
     target_path = Path(target_folder)
 
     base_pe = PEData(target_path / "ForgedAlliance_base.exe")
@@ -352,18 +374,25 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
     folders = scan_for_headers_in_section(section_folder_path)
     includes = " ".join((f"-I ../section/{folder}/" for folder in folders))
 
+    # if run_system(
+    #         f"""cd {build_folder_path} &
+    #         {clang_compiler_path} -M
+    #         -I ../include/ {includes}
+    #         ../section/main.cxx"""):
+    #     raise Exception("Errors occurred during building of cxx files")
+
     if run_system(
             f"""cd {build_folder_path} &
-            {clang_compiler_path} {CLANG_FLAGS}
+            {clang_compiler_path} -c {clang_flags}
             -I ../include/ {includes}
             ../section/main.cxx -o clangfile.o"""):
         raise Exception("Errors occurred during building of cxx files")
 
     create_sections_file(target_path / "section.ld",
-                         function_addresses | cxx_address_names)
+                         function_addresses | cxx_address_names | config_functions)
     if run_system(
             f"""cd {build_folder_path} &
-            {gcc_compiler_path} {GCC_FLAGS}
+            {gcc_compiler_path} {gcc_flags}
             -I ../include/ {includes}
             -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,sectmap.txt,-o,section.pe
             ../section/main.cpp"""):
@@ -395,7 +424,7 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
 
     if run_system(
             f"""cd {build_folder_path} &
-            {gcc_compiler_path} -c {GCC_FLAGS_ASM} ../hooks/*.cpp"""):
+            {gcc_compiler_path} -c {gcc_flags_asm} ../hooks/*.cpp"""):
         raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
@@ -452,6 +481,16 @@ def patch(_, target_folder, clang_compiler_path, linker_path, gcc_compiler_path,
             "  }\n",
             "}"
         ])
+
+    # if run_system(
+    #     f"""cd {target_path} &
+    #     {clang_compiler_path} -pipe -m32 -Os -nostdlib -Werror -masm=intel -std=c++20 -march=core2 -c
+    #         -I ../include/ {includes}
+    #         ../section/test.cxx -o test.o
+    #     """
+    # ):
+    #     raise Exception("Errors occurred during builing of test")
+
     if run_system(
             f"""cd {target_path} &
             {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"""):

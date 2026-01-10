@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "BuildPatches",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/main.py",
+        "${workspaceFolder}/FA-Binary-Patches/config.json",
+        "${workspaceFolder}/FA-Binary-Patches/",
+      ],
+      "type": "shell",
+
+    },
+  ]
+}
