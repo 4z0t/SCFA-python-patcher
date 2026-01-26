@@ -22,7 +22,7 @@ def load_compiler_config(config_path: Path):
     compilers['ASM_FLAGS'] = config.get("asm_flags", [])
 
     compilers['CLANG_COMPILER_PATH'] = config.get('clang', 'clang++')
-    compilers['GCC_COMPILER_PATH'] = config.get('gcc', 'gcc')
+    compilers['GCC_COMPILER_PATH'] = config.get('gcc', 'g++')
     compilers['LINKER_PATH'] = config.get('linker', 'ld')
 
     compilers["FUNCS"] = config.get("functions", {})
