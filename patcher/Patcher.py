@@ -313,13 +313,9 @@ def patch(config_path):
 
     paths = find_patch_files(section_folder_path)
 
-    # files_contents = read_files_contents(f"{target_path}/section/", paths)
-    # files_contents, address_names = preprocess_lines(files_contents)
-
     with open(section_folder_path / "main.cpp", "w") as main_file:
         for path in paths:
             main_file.writelines(f"#include \"{path}\"\n")
-        # main_file.writelines(files_contents)
 
     function_addresses = {
         name: name for name in scan_header_files(config.target_folder_path)}
