@@ -1,5 +1,5 @@
 {
-    "target_folder_path": "<absolute path to FA-Binary-Patches folder>",
+    "target_folder_path": "FA-Binary-Patches",
     "input_name": "ForgedAlliance_base.exe",
     "output_name": "ForgedAlliance_exxt.exe",
     "clang": "clang++.exe",

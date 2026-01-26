@@ -6,6 +6,7 @@ from typing import Self
 
 @dataclass
 class Config:
+    path: Path
     target_folder_path: Path
     build_folder_path: Path
     input_name: str = "ForgedAlliance_base.exe"
@@ -23,9 +24,12 @@ class Config:
 
     @classmethod
     def load_from_json(cls, path: Path) -> Self:
+        path = Path(path).resolve()
         with open(path, 'r') as f:
             config = json.load(f)
+
         return cls(
+            path=path,
             target_folder_path=config.get("target_folder_path", path.parent),
             build_folder_path=config.get("build_folder_path"),
             input_name=config.get("input_name", Config.input_name),
@@ -41,6 +45,10 @@ class Config:
 
     def __post_init__(self):
         self.target_folder_path = Path(self.target_folder_path)
+
+        if not self.target_folder_path.is_absolute():
+            self.target_folder_path = self.path.parent / self.target_folder_path
+
         self.build_folder_path = Path(self.build_folder_path)\
             if self.build_folder_path \
             else self.target_folder_path / "build"
@@ -48,10 +56,6 @@ class Config:
         self.clang_path = Path(self.clang_path)
         self.gcc_path = Path(self.gcc_path)
         self.linker_path = Path(self.linker_path)
-
-        if not self.target_folder_path.is_absolute():
-            raise ValueError(
-                "target_folder_path must be an absolute path to folder")
 
         if not self.build_folder_path.is_absolute():
             raise ValueError(
