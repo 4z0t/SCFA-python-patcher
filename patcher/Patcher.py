@@ -324,13 +324,9 @@ def patch(config_path):
     function_addresses = {
         name: name for name in scan_header_files(config.target_folder_path)}
 
-    cxx_files_contents = read_files_contents(section_folder_path, list_files_at(
-        section_folder_path, "**/*.cxx", ["main.cxx"]))
-    cxx_files_contents, cxx_address_names = preprocess_lines(
-        cxx_files_contents)
-
     with open(section_folder_path / "main.cxx", "w") as main_file:
-        main_file.writelines(cxx_files_contents)
+        for path in list_files_at(section_folder_path, "**/*.cxx", ["main.cxx"]):
+            main_file.writelines(f"#include \"{path}\"\n")
 
     # if run_system(
     #         f"""cd {build_folder_path} &
@@ -348,7 +344,7 @@ def patch(config_path):
         raise Exception("Errors occurred during building of cxx files")
 
     create_sections_file(config.target_folder_path / "section.ld",
-                         function_addresses | cxx_address_names | config.functions)
+                         function_addresses | config.functions)
     if run_system(
             f"""cd {build_folder_path} &
             {config.gcc_path} {" ".join(config.gcc_flags)}
