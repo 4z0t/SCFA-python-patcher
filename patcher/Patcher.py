@@ -307,9 +307,12 @@ def patch(config_path):
 
     new_v_offset = align(new_v_offset, base_pe.sectalign)
     new_f_offset = align(new_f_offset, base_pe.filealign)
-    print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
+    image_base = base_pe.imgbase + new_v_offset - 0x1000
+    print(f"Image base: {image_base:x}")
 
     section_folder_path = config.target_folder_path / "section"
+    include_folder_path = config.target_folder_path / "include"
+    hooks_folder_path = config.target_folder_path / "hooks"
 
     paths = find_patch_files(section_folder_path)
 
@@ -333,20 +336,20 @@ def patch(config_path):
     build_folder_path = config.build_folder_path
 
     if run_system(
-            f"""cd {build_folder_path} &
-            {config.clang_path} -c {" ".join(config.clang_flags)}
-            -I ../include/
-            ../section/main.cxx -o clangfile.o"""):
+            f"""{config.clang_path}
+            -c {" ".join(config.clang_flags)}
+            -I {include_folder_path} {section_folder_path / "main.cxx"}
+            -o {build_folder_path / "clangfile.o"}"""):
         raise Exception("Errors occurred during building of cxx files")
 
-    create_sections_file(config.target_folder_path / "section.ld",
+    create_sections_file(build_folder_path / "section.ld",
                          function_addresses | config.functions)
     if run_system(
-            f"""cd {build_folder_path} &
+            f""" cd {build_folder_path} & 
             {config.gcc_path} {" ".join(config.gcc_flags)}
-            -I ../include/
-            -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,sectmap.txt,-o,section.pe
-            ../section/main.cpp"""):
+            -I {include_folder_path}
+            -Wl,-T,section.ld,--image-base,{image_base},-s,-Map,sectmap.txt,-o,section.pe
+            {section_folder_path / "main.cpp"}"""):
         raise Exception("Errors occurred during building of patch files")
 
     remove_files_at(build_folder_path, "**/*.o")
@@ -365,7 +368,7 @@ def patch(config_path):
 
     def generate_hook_files(folder_path: Path):
         for file_path in list_files_at(folder_path, "**/*.hook"):
-            hook = Hook. load_hook(folder_path/file_path)
+            hook = Hook.load_hook(folder_path/file_path)
             hook_path = file_path.replace(os.sep, "_") + ".cpp"
             print(f"Generating {hook_path}")
             with open(folder_path/hook_path, "w") as f:
@@ -375,12 +378,12 @@ def patch(config_path):
 
     if run_system(
             f"""cd {build_folder_path} &
-            {config.gcc_path} -c {" ".join(config.asm_flags)} ../hooks/*.cpp"""):
+            {config.gcc_path} -c {" ".join(config.asm_flags)} {hooks_folder_path / "*.cpp"}"""):
         raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
     for path in list_files_at(build_folder_path, "**/*.o"):
-        coff_data = COFFData(build_folder_path / path, f"build/{path}")
+        coff_data = COFFData(build_folder_path / path, path)
         for sect in coff_data.sects:
             if len(sect.name) >= 8:
                 raise Exception(f"sect name too long {sect.name}")
@@ -395,10 +398,10 @@ def patch(config_path):
     ssize = section_pe.sects[-1].v_offset + \
         section_pe.sects[-1].v_size + section_pe.sects[0].v_offset
 
-    with open(config.target_folder_path / "patch.ld", "w") as pld:
+    with open(build_folder_path / "patch.ld", "w") as pld:
         pld.writelines([
             "OUTPUT_FORMAT(pei-i386)\n",
-            "OUTPUT(build/patch.pe)\n",
+            "OUTPUT(patch.pe)\n",
         ])
 
         for name, address in addresses.items():
@@ -443,8 +446,8 @@ def patch(config_path):
     #     raise Exception("Errors occurred during builing of test")
 
     if run_system(
-            f"""cd {config.target_folder_path} &
-            {config.linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"""):
+            f"""cd {build_folder_path} &
+            {config.linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map patchmap.txt"""):
         raise Exception("Errors occurred during linking")
 
     base_file_data = bytearray(base_pe.data)
@@ -511,4 +514,4 @@ def patch(config_path):
     save_new_base_data(base_file_data)
 
     remove_files_at(build_folder_path, "**/*.o")
-    remove_files_at(config.target_folder_path / "hooks", "*.hook.cpp")
+    remove_files_at(hooks_folder_path, "*.hook.cpp")
