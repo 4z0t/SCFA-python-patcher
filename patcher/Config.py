@@ -26,7 +26,7 @@ class Config:
         with open(path, 'r') as f:
             config = json.load(f)
         return cls(
-            target_folder_path=config.get("target_folder_path"),
+            target_folder_path=config.get("target_folder_path", path.parent),
             build_folder_path=config.get("build_folder_path"),
             input_name=config.get("input_name"),
             output_name=config.get("output_name"),
