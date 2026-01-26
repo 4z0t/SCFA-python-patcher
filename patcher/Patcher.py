@@ -293,7 +293,6 @@ def run_system(command: str) -> int:
 
 def patch(config_path):
     config = Config.load_from_json(Path(config_path))
-    print(config)
 
     base_pe = PEData(config.input_path)
     new_v_offset = 0
