@@ -313,6 +313,7 @@ def patch(config_path):
     section_folder_path = config.target_folder_path / "section"
     include_folder_path = config.target_folder_path / "include"
     hooks_folder_path = config.target_folder_path / "hooks"
+    build_folder_path = config.build_folder_path
 
     paths = find_patch_files(section_folder_path)
 
@@ -327,14 +328,6 @@ def patch(config_path):
         for path in list_files_at(section_folder_path, "**/*.cxx", ["main.cxx"]):
             main_file.writelines(f"#include \"{path}\"\n")
 
-    # if run_system(
-    #         f"""cd {build_folder_path} &
-    #         {clang_compiler_path} -M
-    #         -I ../include/ {includes}
-    #         ../section/main.cxx"""):
-    #     raise Exception("Errors occurred during building of cxx files")
-    build_folder_path = config.build_folder_path
-
     if run_system(
             f"""{config.clang_path}
             -c {" ".join(config.clang_flags)}
@@ -345,7 +338,7 @@ def patch(config_path):
     create_sections_file(build_folder_path / "section.ld",
                          function_addresses | config.functions)
     if run_system(
-            f""" cd {build_folder_path} & 
+            f""" cd {build_folder_path} &
             {config.gcc_path} {" ".join(config.gcc_flags)}
             -I {include_folder_path}
             -Wl,-T,section.ld,--image-base,{image_base},-s,-Map,sectmap.txt,-o,section.pe
@@ -435,15 +428,6 @@ def patch(config_path):
             "  }\n",
             "}"
         ])
-
-    # if run_system(
-    #     f"""cd {target_path} &
-    #     {clang_compiler_path} -pipe -m32 -Os -nostdlib -Werror -masm=intel -std=c++20 -march=core2 -c
-    #         -I ../include/ {includes}
-    #         ../section/test.cxx -o test.o
-    #     """
-    # ):
-    #     raise Exception("Errors occurred during builing of test")
 
     if run_system(
             f"""cd {build_folder_path} &
