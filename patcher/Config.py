@@ -49,6 +49,14 @@ class Config:
         self.gcc_path = Path(self.gcc_path)
         self.linker_path = Path(self.linker_path)
 
+        if not self.target_folder_path.is_absolute():
+            raise ValueError(
+                "target_folder_path must be an absolute path to folder")
+
+        if not self.build_folder_path.is_absolute():
+            raise ValueError(
+                "build_folder_path must be an absolute path to folder")
+
     @property
     def input_path(self) -> Path:
         return self.target_folder_path / self.input_name
