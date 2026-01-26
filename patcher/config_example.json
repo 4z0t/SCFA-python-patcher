@@ -1,0 +1,58 @@
+{
+    "target_folder_path": "<absolute path to FA-Binary-Patches folder>",
+    "input_name": "ForgedAlliance_base.exe",
+    "output_name": "ForgedAlliance_exxt.exe",
+    "clang": "clang++.exe",
+    "gcc": "g++.exe",
+    "linker": "ld.exe",
+    "clang_flags": [
+        "-pipe",
+        "-m32",
+        "-O3",
+        "-nostdlib",
+        "-Werror",
+        "-masm=intel",
+        "-std=c++20",
+        "-march=core2"
+    ],
+    "gcc_flags": [
+        "-pipe",
+        "-m32",
+        "-Os",
+        "-fno-exceptions",
+        "-nostdlib",
+        "-nostartfiles",
+        "-fpermissive",
+        "-masm=intel",
+        "-std=c++20",
+        "-march=core2",
+        "-mfpmath=both"
+    ],
+    "asm_flags": [
+        "-pipe",
+        "-m32",
+        "-Os",
+        "-fno-exceptions",
+        "-nostdlib",
+        "-nostartfiles",
+        "-w",
+        "-fpermissive",
+        "-masm=intel",
+        "-std=c++20",
+        "-march=core2",
+        "-mfpmath=both"
+    ],
+    "functions": {
+        "_atexit": "0xA8211E",
+        "__Znwj": "0xA825B9",
+        "__ZdlPvj": "0x958C40",
+        "__imp__GetModuleHandleA@4": "0xC0F378",
+        "__imp__GetProcAddress@8": "0xC0F48C",
+        "___CxxFrameHandler3": "0xA8958C",
+        "___std_terminate": "0xA994FB",
+        "??_7type_info@@6B@": "0xD72A88",
+        "__CxxThrowException@8": "0x00A89950",
+        "_memset": "0xA89110",
+        "__invoke_watson": "0x00A848E8"
+    }
+}
