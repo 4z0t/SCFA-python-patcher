@@ -9,6 +9,7 @@ import struct
 import itertools
 from patcher import Hook
 from .Config import Config
+from string.templatelib import Template
 
 
 SECT_SIZE = 0x80000
@@ -286,7 +287,21 @@ def scan_for_headers_in_section(sections_path: Path):
     return folders
 
 
-def run_system(command: str) -> int:
+def run_system(template: Template) -> int:
+    if not isinstance(template, Template):
+        raise Exception("Not a template")
+
+    command = []
+    for part in template:
+        if isinstance(part, str):
+            command.append(part)
+        else:
+            value = part.value
+            if isinstance(value, Path) and ' ' in str(value):
+                command.append(f"\"{value}\"")
+            else:
+                command.append(str(value))
+    command = "".join(command)
     print(command)
     return os.system(command.replace("\n", " "))
 
@@ -329,21 +344,15 @@ def patch(config_path):
             main_file.writelines(f"#include \"{path}\"\n")
 
     if run_system(
-            f"""{config.clang_path}
-            -c {" ".join(config.clang_flags)}
-            -I {include_folder_path} {section_folder_path / "main.cxx"}
-            -o {build_folder_path / "clangfile.o"}"""):
+            t"""{config.clang_path} -c {" ".join(config.clang_flags)} -I {include_folder_path} {section_folder_path / "main.cxx"} -o {build_folder_path / "clangfile.o"}"""):
         raise Exception("Errors occurred during building of cxx files")
 
     create_sections_file(build_folder_path / "section.ld",
                          function_addresses | config.functions)
     if run_system(
-            f""" cd {build_folder_path} &
-            {config.gcc_path} {" ".join(config.gcc_flags)}
-            -I {include_folder_path}
-            -Wl,-T,section.ld,--image-base,{image_base},-s,-Map,sectmap.txt,-o,section.pe
-            {section_folder_path / "main.cpp"}"""):
-        raise Exception("Errors occurred during building of patch files")
+        t""" cd {build_folder_path} &
+            {config.gcc_path} {" ".join(config.gcc_flags)}             -I {include_folder_path}             -Wl,-T,section.ld,--image-base,{image_base},-s,-Map,sectmap.txt,-o,section.pe             {section_folder_path / "main.cpp"}"""):
+                raise Exception("Errors occurred during building of patch files")
 
     remove_files_at(build_folder_path, "**/*.o")
 
@@ -370,9 +379,9 @@ def patch(config_path):
     generate_hook_files(config.target_folder_path/"hooks")
 
     if run_system(
-            f"""cd {build_folder_path} &
+        t"""cd {build_folder_path} &
             {config.gcc_path} -c {" ".join(config.asm_flags)} {hooks_folder_path / "*.cpp"}"""):
-        raise Exception("Errors occurred during building of hooks files")
+                raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
     for path in list_files_at(build_folder_path, "**/*.o"):
@@ -430,9 +439,9 @@ def patch(config_path):
         ])
 
     if run_system(
-            f"""cd {build_folder_path} &
+        t"""cd {build_folder_path} &
             {config.linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map patchmap.txt"""):
-        raise Exception("Errors occurred during linking")
+                raise Exception("Errors occurred during linking")
 
     base_file_data = bytearray(base_pe.data)
 
