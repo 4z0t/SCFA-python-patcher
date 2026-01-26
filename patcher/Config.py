@@ -28,15 +28,15 @@ class Config:
         return cls(
             target_folder_path=config.get("target_folder_path", path.parent),
             build_folder_path=config.get("build_folder_path"),
-            input_name=config.get("input_name"),
-            output_name=config.get("output_name"),
-            clang_path=config.get("clang"),
-            gcc_path=config.get("gcc"),
-            linker_path=config.get("linker"),
-            clang_flags=config.get("clang_flags"),
-            gcc_flags=config.get("gcc_flags"),
-            asm_flags=config.get("asm_flags"),
-            functions=config.get("functions"),
+            input_name=config.get("input_name", Config.input_name),
+            output_name=config.get("output_name", Config.output_name),
+            clang_path=config.get("clang", Config.clang_path),
+            gcc_path=config.get("gcc", Config.gcc_path),
+            linker_path=config.get("linker", Config.linker_path),
+            clang_flags=config.get("clang_flags", Config.clang_flags),
+            gcc_flags=config.get("gcc_flags", Config.gcc_flags),
+            asm_flags=config.get("asm_flags", Config.asm_flags),
+            functions=config.get("functions", {}),
         )
 
     def __post_init__(self):
