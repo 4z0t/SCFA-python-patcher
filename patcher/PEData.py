@@ -76,4 +76,4 @@ class PEData(BasicBinaryParser):
         for sect in self.sects:
             if sect.name == name:
                 return sect
-        return None
+        raise Exception(f"Couldn't find section {name}")

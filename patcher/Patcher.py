@@ -8,26 +8,7 @@ from typing import Optional
 import struct
 import itertools
 from patcher import Hook
-
-
-def load_compiler_config(config_path: Path):
-    """Load compiler configuration from JSON file."""
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-
-    compilers = {}
-
-    compilers['CLANG_FLAGS'] = config.get("clang_flags", [])
-    compilers['GCC_FLAGS'] = config.get("gcc_flags", [])
-    compilers['ASM_FLAGS'] = config.get("asm_flags", [])
-
-    compilers['CLANG_COMPILER_PATH'] = config.get('clang', 'clang++')
-    compilers['GCC_COMPILER_PATH'] = config.get('gcc', 'g++')
-    compilers['LINKER_PATH'] = config.get('linker', 'ld')
-
-    compilers["FUNCS"] = config.get("functions", {})
-
-    return compilers
+from .Config import Config
 
 
 SECT_SIZE = 0x80000
@@ -310,22 +291,11 @@ def run_system(command: str) -> int:
     return os.system(command.replace("\n", " "))
 
 
-def patch(config_path, target_folder):
-    config = load_compiler_config(Path(config_path))
+def patch(config_path):
+    config = Config.load_from_json(Path(config_path))
+    print(config)
 
-    clang_compiler_path = config.get('CLANG_COMPILER_PATH')
-    linker_path = config.get('LINKER_PATH')
-    gcc_compiler_path = config.get('GCC_COMPILER_PATH')
-
-    clang_flags = " ".join(config.get('CLANG_FLAGS', []))
-    gcc_flags = " ".join(config.get('GCC_FLAGS', []))
-    gcc_flags_asm = " ".join(config.get('ASM_FLAGS', []))
-
-    config_functions = config.get("FUNCS", {})
-
-    target_path = Path(target_folder)
-
-    base_pe = PEData(target_path / "ForgedAlliance_base.exe")
+    base_pe = PEData(config.input_path)
     new_v_offset = 0
     new_f_offset = 0
 
@@ -340,8 +310,7 @@ def patch(config_path, target_folder):
     new_f_offset = align(new_f_offset, base_pe.filealign)
     print(f"Image base: {base_pe.imgbase + new_v_offset - 0x1000:x}")
 
-    section_folder_path = target_path / "section"
-    build_folder_path = target_path / "build"
+    section_folder_path = config.target_folder_path / "section"
 
     paths = find_patch_files(section_folder_path)
 
@@ -354,7 +323,7 @@ def patch(config_path, target_folder):
         # main_file.writelines(files_contents)
 
     function_addresses = {
-        name: name for name in scan_header_files(target_path)}
+        name: name for name in scan_header_files(config.target_folder_path)}
 
     cxx_files_contents = read_files_contents(section_folder_path, list_files_at(
         section_folder_path, "**/*.cxx", ["main.cxx"]))
@@ -373,19 +342,20 @@ def patch(config_path, target_folder):
     #         -I ../include/ {includes}
     #         ../section/main.cxx"""):
     #     raise Exception("Errors occurred during building of cxx files")
+    build_folder_path = config.build_folder_path
 
     if run_system(
             f"""cd {build_folder_path} &
-            {clang_compiler_path} -c {clang_flags}
+            {config.clang_path} -c {" ".join(config.clang_flags)}
             -I ../include/ {includes}
             ../section/main.cxx -o clangfile.o"""):
         raise Exception("Errors occurred during building of cxx files")
 
-    create_sections_file(target_path / "section.ld",
-                         function_addresses | cxx_address_names | config_functions)
+    create_sections_file(config.target_folder_path / "section.ld",
+                         function_addresses | cxx_address_names | config.functions)
     if run_system(
             f"""cd {build_folder_path} &
-            {gcc_compiler_path} {gcc_flags}
+            {config.gcc_path} {" ".join(config.gcc_flags)}
             -I ../include/ {includes}
             -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,sectmap.txt,-o,section.pe
             ../section/main.cpp"""):
@@ -403,7 +373,7 @@ def patch(config_path, target_folder):
             ])
             for name, address in addresses.items():
                 f.write(f"#define {name} {address}\n")
-    create_defines_file(target_path / "define.h", addresses)
+    create_defines_file(config.target_folder_path / "define.h", addresses)
 
     def generate_hook_files(folder_path: Path):
         for file_path in list_files_at(folder_path, "**/*.hook"):
@@ -413,11 +383,11 @@ def patch(config_path, target_folder):
             with open(folder_path/hook_path, "w") as f:
                 f.write(hook.to_cpp())
 
-    generate_hook_files(target_path/"hooks")
+    generate_hook_files(config.target_folder_path/"hooks")
 
     if run_system(
             f"""cd {build_folder_path} &
-            {gcc_compiler_path} -c {gcc_flags_asm} ../hooks/*.cpp"""):
+            {config.gcc_path} -c {" ".join(config.asm_flags)} ../hooks/*.cpp"""):
         raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
@@ -437,7 +407,7 @@ def patch(config_path, target_folder):
     ssize = section_pe.sects[-1].v_offset + \
         section_pe.sects[-1].v_size + section_pe.sects[0].v_offset
 
-    with open(target_path / "patch.ld", "w") as pld:
+    with open(config.target_folder_path / "patch.ld", "w") as pld:
         pld.writelines([
             "OUTPUT_FORMAT(pei-i386)\n",
             "OUTPUT(build/patch.pe)\n",
@@ -485,8 +455,8 @@ def patch(config_path, target_folder):
     #     raise Exception("Errors occurred during builing of test")
 
     if run_system(
-            f"""cd {target_path} &
-            {linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"""):
+            f"""cd {config.target_folder_path} &
+            {config.linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map build/patchmap.txt"""):
         raise Exception("Errors occurred during linking")
 
     base_file_data = bytearray(base_pe.data)
@@ -520,7 +490,7 @@ def patch(config_path, target_folder):
     if SECT_SIZE > 0:
         if SECT_SIZE < exxt_sect.f_size:
             raise Exception(
-                f"Section size too small. Required: 0x{exxt_sect.f_size:x}")
+                f"Section size too small. Required: 0x{exxt_sect.f_size: x}")
 
         exxt_sect.v_size = SECT_SIZE
         exxt_sect.f_size = SECT_SIZE
@@ -532,10 +502,11 @@ def patch(config_path, target_folder):
         replace_data(section_pe.data[s.f_offset:s.f_offset+s.f_size],
                      nsect.f_offset+s.v_offset-section_pe.sects[0].v_offset)
 
-    apply_sig_patches(target_path / "SigPatches.txt", base_file_data)
+    apply_sig_patches(config.target_folder_path /
+                      "SigPatches.txt", base_file_data)
 
     def save_new_base_data(data: bytearray):
-        with open(target_path / "ForgedAlliance_exxt.exe", "wb") as nf:
+        with open(config.output_path, "wb") as nf:
             sect_count = len(base_pe.sects)
             nf.write(data)
             nf.seek(base_pe.offset+0x6)
@@ -552,4 +523,4 @@ def patch(config_path, target_folder):
     save_new_base_data(base_file_data)
 
     remove_files_at(build_folder_path, "**/*.o")
-    remove_files_at(target_path/"hooks", "*.hook.cpp")
+    remove_files_at(config.target_folder_path / "hooks", "*.hook.cpp")
