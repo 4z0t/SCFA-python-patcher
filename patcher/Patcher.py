@@ -332,9 +332,6 @@ def patch(config_path):
     with open(section_folder_path / "main.cxx", "w") as main_file:
         main_file.writelines(cxx_files_contents)
 
-    folders = scan_for_headers_in_section(section_folder_path)
-    includes = " ".join((f"-I ../section/{folder}/" for folder in folders))
-
     # if run_system(
     #         f"""cd {build_folder_path} &
     #         {clang_compiler_path} -M
@@ -346,7 +343,7 @@ def patch(config_path):
     if run_system(
             f"""cd {build_folder_path} &
             {config.clang_path} -c {" ".join(config.clang_flags)}
-            -I ../include/ {includes}
+            -I ../include/
             ../section/main.cxx -o clangfile.o"""):
         raise Exception("Errors occurred during building of cxx files")
 
@@ -355,7 +352,7 @@ def patch(config_path):
     if run_system(
             f"""cd {build_folder_path} &
             {config.gcc_path} {" ".join(config.gcc_flags)}
-            -I ../include/ {includes}
+            -I ../include/
             -Wl,-T,../section.ld,--image-base,{base_pe.imgbase + new_v_offset - 0x1000},-s,-Map,sectmap.txt,-o,section.pe
             ../section/main.cpp"""):
         raise Exception("Errors occurred during building of patch files")
