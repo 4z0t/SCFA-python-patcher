@@ -331,25 +331,25 @@ def patch(config_path):
     with open(build_folder_path / "patch.ld", "w") as pld:
         pld.writelines([
             "OUTPUT_FORMAT(pei-i386)\n",
-            "OUTPUT(patch.pe)\n",
+            "OUTPUT(patch.pe)\n\n",
         ])
 
         for name, address in addresses.items():
             pld.write(f"\"{name}\" = {address};\n")
 
-        pld.writelines(["SECTIONS {\n"
+        pld.writelines(["\nSECTIONS {\n"
                         ])
         hi = 0
         for hook in hooks:
             for sect in hook.sects:
                 pld.writelines([
                     f" .h{hi:X} 0x{sect.offset:x} : SUBALIGN(1) {{\n",
-                    f"     {hook.name}({sect.name})\n",
+                    f"     {hook.name}({sect.name}) /* size : {sect.size} */ \n",
                     " }\n",
                 ])
                 hi += 1
         pld.writelines([
-            f"  .exxt 0x{base_pe.imgbase + new_v_offset:x}: {{\n",
+            f"\n  .exxt 0x{base_pe.imgbase + new_v_offset:x}: {{\n",
             f"  . = . + {ssize};\n",
             "    *(.data)\n",
             "    *(.bss)\n",
