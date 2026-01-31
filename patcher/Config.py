@@ -20,8 +20,6 @@ class Config:
     gcc_flags: tuple[str] = ()
     asm_flags: tuple[str] = ()
 
-    functions: dict[str, str] = field(default_factory=dict)
-
     @classmethod
     def load_from_json(cls, path: Path) -> Self:
         path = Path(path).resolve()
@@ -40,7 +38,6 @@ class Config:
             clang_flags=config.get("clang_flags", Config.clang_flags),
             gcc_flags=config.get("gcc_flags", Config.gcc_flags),
             asm_flags=config.get("asm_flags", Config.asm_flags),
-            functions=config.get("functions", {}),
         )
 
     def __post_init__(self):

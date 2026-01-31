@@ -57,44 +57,14 @@ def read_files_contents(dir_path: Path, paths: list[str]) -> dict[str, list[str]
     return files_contents
 
 
-def create_sections_file(path: Path, address_map: dict[str, str]):
+def create_sections_file(input_path: Path, output_path: Path, address_map: dict[str, str]):
+    with open(input_path, "r") as f:
+        contents = f.read()
 
-    HEADER = """
-OUTPUT_FORMAT(pei-i386)
-OUTPUT(section.pe)
-    """
-    SECTIONS = """
-    SECTIONS {
-        . = __image_base__ + 0x1000;
-        .text : {
-            *(.text*)
-            *(.data*)
-            *(.bss*)
-            *(.rdata)
-        }
-        .ctors : {
-            _FIRST_CTOR = .;
-            *(.ctors)
-            *(.CRT*)
-            _END_CTOR = .;
-        }
-        .clang : {
-            clangfile.o
-        }
-        /DISCARD/ : {
-            *(.rdata$zzz)
-            *(.eh_frame*)
-            *(.reloc)
-            *(.idata*)
-        }
-    }
-    """
-
-    with open(path, "w") as f:
-        f.write(HEADER)
+    with open(output_path, "w") as f:
+        f.write(contents)
         for name, address in address_map.items():
             f.write(f"\"{name}\" = {address};\n")
-        f.write(SECTIONS)
 
 
 def parse_sect_map(file_path: Path) -> dict[str, str]:
@@ -309,12 +279,11 @@ def patch(config_path):
             t"""{config.clang_path} -c {" ".join(config.clang_flags)} -I {include_folder_path} {section_folder_path / "main.cxx"} -o {build_folder_path / "clangfile.o"}"""):
         raise Exception("Errors occurred during building of cxx files")
 
-    create_sections_file(build_folder_path / "section.ld",
-                         function_addresses | config.functions)
+    create_sections_file(config.target_folder_path / "section.ld", build_folder_path / "section.ld",
+                         function_addresses)
     if run_system(
         t""" cd {build_folder_path} &
-            {config.gcc_path} {" ".join(config.gcc_flags)}             -I {include_folder_path}             -Wl,-T,section.ld,--image-base,{image_base},-s,-Map,sectmap.txt,-o,section.pe             {section_folder_path / "main.cpp"}"""):
-                raise Exception("Errors occurred during building of patch files")
+            {config.gcc_path} {" ".join(config.gcc_flags)}             -I {include_folder_path}             -Wl,-T,section.ld,--image-base,{image_base},-s,-Map,sectmap.txt,-o,section.pe             {section_folder_path / "main.cpp"}"""):                raise Exception("Errors occurred during building of patch files")
 
     remove_files_at(build_folder_path, "**/*.o")
 
@@ -342,8 +311,7 @@ def patch(config_path):
 
     if run_system(
         t"""cd {build_folder_path} &
-            {config.gcc_path} -c {" ".join(config.asm_flags)} {hooks_folder_path / "*.cpp"}"""):
-                raise Exception("Errors occurred during building of hooks files")
+            {config.gcc_path} -c {" ".join(config.asm_flags)} {hooks_folder_path / "*.cpp"}"""):                raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
     for path in list_files_at(build_folder_path, "**/*.o"):
@@ -402,8 +370,7 @@ def patch(config_path):
 
     if run_system(
         t"""cd {build_folder_path} &
-            {config.linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map patchmap.txt"""):
-                raise Exception("Errors occurred during linking")
+            {config.linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map patchmap.txt"""):                raise Exception("Errors occurred during linking")
 
     base_file_data = bytearray(base_pe.data)
 
