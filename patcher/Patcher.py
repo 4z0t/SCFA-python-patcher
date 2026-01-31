@@ -15,8 +15,6 @@ from string.templatelib import Template
 SECT_SIZE = 0x80000
 
 ASM_RE = re.compile(r"(asm\(\"(0[xX][0-9a-fA-F]{1,8})\"\);)", re.IGNORECASE)
-CALL_RE = re.compile(
-    r"((call|jmp|je|jne)\s+(0[xX][0-9a-fA-F]{1,8}))", re.IGNORECASE)
 SPACES_RE = re.compile(" +")
 
 
