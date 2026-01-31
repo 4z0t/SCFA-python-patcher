@@ -282,19 +282,9 @@ def patch(config_path):
 
     addresses = parse_sect_map(build_folder_path / "sectmap.txt")
 
-    def create_defines_file(path: Path, addresses: dict[str, str]):
-        with open(path, "w") as f:
-            f.writelines([
-                "#define QUAUX(X) #X\n",
-                "#define QU(X) QUAUX(X)\n\n"
-            ])
-            for name, address in addresses.items():
-                f.write(f"#define {name} {address}\n")
-    create_defines_file(config.target_folder_path / "define.h", addresses)
-
     def generate_hook_files(folder_path: Path):
         for file_path in list_files_at(folder_path, "**/*.hook"):
-            hook = Hook.load_hook(folder_path/file_path)
+            hook = Hook.load_hook(folder_path/file_path, addresses)
             hook_path = file_path.replace(os.sep, "_") + ".cpp"
             print(f"Generating {hook_path}")
             with open(folder_path/hook_path, "w") as f:
