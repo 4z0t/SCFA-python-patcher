@@ -5,6 +5,7 @@ ADDRESS_RE = re.compile(r"^(0[xX][0-9A-Fa-f]{6,8})\:$")
 FUNCTION_NAME_RE = re.compile(r"@([a-zA-Z\_][a-zA-Z0-9\_]+)")
 ESCAPE_TRANSLATION = str.maketrans({"\"":  r"\"", "\\": r"\\", })
 
+
 class Section:
 
     def __init__(self, address: str, lines: list[str], addresses: dict[str, str]) -> None:
@@ -30,11 +31,11 @@ class Section:
         return "\n".join(s)
 
     def header(self, index: int) -> str:
+        if self._address is None:
+            return ""
         return f'.section h{index:X}; .set h{index:X},{self._address};'
 
     def to_cpp(self, index: int) -> str:
-        if self._address is None:
-            return self.lines_to_cpp()
         return f'{self.header(index)}\n{self.lines_to_cpp()}'
 
 
