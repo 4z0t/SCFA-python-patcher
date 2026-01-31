@@ -15,7 +15,7 @@ class Section:
     def lines_to_cpp(self):
         s = []
         for line in self._lines:
-            line = line.translate(ESCAPE_TRANSLATION)
+            # line = line.translate(ESCAPE_TRANSLATION)
 
             def replace_address(match: re.Match[str]) -> str:
                 func_name = match.group(1)
@@ -26,11 +26,11 @@ class Section:
             if FUNCTION_NAME_RE.findall(line):
                 line = FUNCTION_NAME_RE.subn(replace_address, line)[0]
 
-            s.append(f'"{line};"')
+            s.append(f'{line};')
         return "\n".join(s)
 
     def header(self, index: int) -> str:
-        return f'".section h{index:X}; .set h{index:X},{self._address};"'
+        return f'.section h{index:X}; .set h{index:X},{self._address};'
 
     def to_cpp(self, index: int) -> str:
         if self._address is None:
@@ -47,7 +47,7 @@ class Hook:
         if len(self._sections) > 0:
             sections_lines = (section.to_cpp(i).split("\n")
                               for i, section in enumerate(self._sections))
-            s += f"asm(\n{''.join((f"    {line}\n" for lines in sections_lines for line in lines))});"
+            s += f"asm(R\"(\n{''.join((f"    {line}\n" for lines in sections_lines for line in lines))})\");"
         return s
 
 
