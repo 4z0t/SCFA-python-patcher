@@ -279,6 +279,7 @@ def patch(config_path):
                 raise Exception("Errors occurred during building of patch files")
 
     remove_files_at(build_folder_path, "**/*.o")
+    remove_files_at(hooks_folder_path, "*.hook.cpp")
 
     addresses = parse_sect_map(build_folder_path / "sectmap.txt")
 
