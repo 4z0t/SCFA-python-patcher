@@ -22,7 +22,7 @@ class Section:
                 func_name = match.group(1)
                 if func_name in self._addresses:
                     # return f'{self._addresses[func_name]} /* {func_name} */'
-                    return match.group(1)
+                    return self._addresses[func_name]
                 return match.group(0)
 
             if FUNCTION_NAME_RE.findall(line):
