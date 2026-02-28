@@ -218,6 +218,7 @@ def apply_sig_patches(file_path: Path, data: bytearray):
 
 
 def run_process(args, cwd: Optional[str] = None) -> bool:
+    print(" ".join((str(arg) for arg in args)))
     result = subprocess.run(args, cwd=cwd)
     return result.returncode != 0
 
