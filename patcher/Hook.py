@@ -48,7 +48,8 @@ class Hook:
         if len(self._sections) > 0:
             sections_lines = (section.to_cpp(i).split("\n")
                               for i, section in enumerate(self._sections))
-            s += f"asm(R\"(\n{''.join((f"    {line}\n" for lines in sections_lines for line in lines))})\");"
+            s += f"asm(R\"(\n{''.join((f"    {line}\n" if not line.startswith(".section") else f'\n{line}\n'
+                                       for lines in sections_lines for line in lines))})\");"
         return s
 
 
