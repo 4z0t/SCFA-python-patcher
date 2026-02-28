@@ -9,8 +9,8 @@ class Config:
     path: Path
     target_folder_path: Path
     build_folder_path: Path
-    input_name: str = "ForgedAlliance_base.exe"
-    output_name: str = "ForgedAlliance_exxt.exe"
+    input_exe_path: Path = "ForgedAlliance_base.exe"
+    output_exe_path: Path = "ForgedAlliance_exxt.exe"
 
     clang_path: Path = "clang++"
     gcc_path: Path = "g++"
@@ -30,8 +30,9 @@ class Config:
             path=path,
             target_folder_path=config.get("target_folder_path", path.parent),
             build_folder_path=config.get("build_folder_path"),
-            input_name=config.get("input_name", Config.input_name),
-            output_name=config.get("output_name", Config.output_name),
+            input_exe_path=config.get("input_exe_path", Config.input_exe_path),
+            output_exe_path=config.get(
+                "output_exe_path", Config.output_exe_path),
             clang_path=config.get("clang", Config.clang_path),
             gcc_path=config.get("gcc", Config.gcc_path),
             linker_path=config.get("linker", Config.linker_path),
@@ -42,6 +43,8 @@ class Config:
 
     def __post_init__(self):
         self.target_folder_path = Path(self.target_folder_path)
+        self.input_exe_path = Path(self.input_exe_path)
+        self.output_exe_path = Path(self.output_exe_path)
 
         if not self.target_folder_path.is_absolute():
             self.target_folder_path = self.path.parent / self.target_folder_path
@@ -60,8 +63,12 @@ class Config:
 
     @property
     def input_path(self) -> Path:
-        return self.target_folder_path / self.input_name
+        if self.input_exe_path.is_absolute():
+            return self.input_exe_path
+        return self.target_folder_path / self.input_exe_path
 
     @property
     def output_path(self) -> Path:
-        return self.build_folder_path / self.output_name
+        if self.output_exe_path.is_absolute():
+            return self.output_exe_path
+        return self.build_folder_path / self.output_exe_path

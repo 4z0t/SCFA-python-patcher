@@ -1,7 +1,7 @@
 {
     "target_folder_path": "FA-Binary-Patches",
-    "input_name": "ForgedAlliance_base.exe",
-    "output_name": "ForgedAlliance_exxt.exe",
+    "input_exe_path": "ForgedAlliance_base.exe",
+    "output_exe_path": "ForgedAlliance_exxt.exe",
     "clang": "clang++.exe",
     "gcc": "g++.exe",
     "linker": "ld.exe",
