@@ -22,8 +22,8 @@ config structure:
     // path to build folder. Defaults to "{target_folder_path}/build"
     "build_folder_path": null,
     // names of input and output files
-    "input_name": "ForgedAlliance_base.exe",
-    "output_name": "ForgedAlliance_exxt.exe",
+    "input_exe_path": "ForgedAlliance_base.exe",
+    "output_exe_path": "C:\\ProgramData\\FAForever\\bin\\ForgedAlliance_exxt.exe",
     // path to clang++ compiler. Defaults to "clang++"
     "clang": "clang++.exe",
     // path to g++ compiler. Defaults to "g++"
