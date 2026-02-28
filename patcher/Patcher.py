@@ -10,6 +10,7 @@ import itertools
 from patcher import Hook
 from .Config import Config
 from string.templatelib import Template
+import subprocess
 
 
 SECT_SIZE = 0x80000
@@ -216,23 +217,9 @@ def apply_sig_patches(file_path: Path, data: bytearray):
         i += 2
 
 
-def run_system(template: Template) -> int:
-    if not isinstance(template, Template):
-        raise Exception("Not a template")
-
-    command = []
-    for part in template:
-        if isinstance(part, str):
-            command.append(part)
-        else:
-            value = part.value
-            if isinstance(value, Path) and ' ' in str(value):
-                command.append(f"\"{value}\"")
-            else:
-                command.append(str(value))
-    command = "".join(command)
-    print(command)
-    return os.system(command.replace("\n", " "))
+def run_process(args, cwd: Optional[str] = None) -> bool:
+    result = subprocess.run(args, cwd=cwd)
+    return result.returncode != 0
 
 
 def patch(config_path):
@@ -277,16 +264,23 @@ def patch(config_path):
         for path in list_files_at(section_folder_path, "**/*.cxx", {"main.cxx"}):
             main_file.writelines(f"#include \"{path}\"\n")
 
-    if run_system(
-            t"""{config.clang_path} -c {" ".join(config.clang_flags)} -I {include_folder_path} {section_folder_path / "main.cxx"} -o {build_folder_path / "clangfile.o"}"""):
+    if run_process((
+        config.clang_path,
+        "-c", *config.clang_flags,
+        "-I", include_folder_path,
+        section_folder_path / "main.cxx",
+        "-o", build_folder_path / "clangfile.o"
+    )):
         raise Exception("Errors occurred during building of cxx files")
 
     create_sections_file(config.target_folder_path / "section.ld", build_folder_path / "section.ld",
                          function_addresses)
-    if run_system(
-        t""" cd {build_folder_path} &
-            {config.gcc_path} {" ".join(config.gcc_flags)}                                       -I {include_folder_path}             -Wl,-T,section.ld,--image-base,{image_base},-s,-Map,sectmap.txt,-o,section.pe             {section_folder_path / "main.cpp"}"""):
-                raise Exception("Errors occurred during building of patch files")
+
+    if run_process((
+        config.gcc_path, *config.gcc_flags, "-I", include_folder_path,
+        f"-Wl,-T,section.ld,--image-base,{image_base},-s,-Map,sectmap.txt,-o,section.pe", section_folder_path / "main.cpp"
+    ), cwd=build_folder_path):
+        raise Exception("Errors occurred during building of patch files")
 
     addresses = parse_sect_map(build_folder_path / "sectmap.txt")
 
@@ -299,19 +293,22 @@ def patch(config_path):
                 f.write(hook.to_cpp())
 
     generate_hook_files(config.target_folder_path/"hooks", build_hooks_folder)
-    generate_hook_files(config.target_folder_path/"section", build_hooks_folder)
+    generate_hook_files(config.target_folder_path /
+                        "section", build_hooks_folder)
 
-    if run_system(
-        t"""cd {build_hooks_folder} &
-            {config.gcc_path} -c {" ".join(config.asm_flags)} {build_hooks_folder / "*.cpp"}"""):                raise Exception(
-                    "Errors occurred during building of generated hooks files")
+    if run_process((
+        config.gcc_path, "-c", *config.asm_flags, build_hooks_folder / "*.cpp"
+    ), cwd=build_hooks_folder):
+        raise Exception(
+            "Errors occurred during building of generated hooks files")
 
     for hook_path in list_files_at(hooks_folder_path, "**/*.cpp"):
         print(f"Hook file {hook_path} is deprecated, use .hook file instead")
 
-    if run_system(
-        t"""cd {build_hooks_folder} &
-            {config.gcc_path} -c {" ".join(config.asm_flags)} {hooks_folder_path / "*.cpp"}"""):                raise Exception("Errors occurred during building of hooks files")
+    if run_process(
+        (config.gcc_path, "-c", *config.asm_flags, hooks_folder_path / "*.cpp"),
+            cwd=build_hooks_folder):
+        raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
     for path in list_files_at(build_hooks_folder, "**/*.o"):
@@ -368,10 +365,11 @@ def patch(config_path):
             "}"
         ])
 
-    if run_system(
-        t"""cd {build_folder_path} &
-            {config.linker_path} -T patch.ld --image-base {base_pe.imgbase} -s -Map patchmap.txt"""):
-                raise Exception("Errors occurred during linking")
+    if run_process((
+       config.linker_path, "-T", "patch.ld", "--image-base",
+       str(base_pe.imgbase), "-s", "-Map", "patchmap.txt"
+       ), cwd=build_folder_path):
+        raise Exception("Errors occurred during linking")
 
     base_file_data = bytearray(base_pe.data)
 
