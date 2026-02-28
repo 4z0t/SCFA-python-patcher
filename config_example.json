@@ -1,0 +1,45 @@
+{
+    "target_folder_path": "FA-Binary-Patches",
+    "input_exe_path": "ForgedAlliance_base.exe",
+    "output_exe_path": "C:\\ProgramData\\FAForever\\bin\\ForgedAlliance_exxt.exe",
+    "clang": "clang++.exe",
+    "gcc": "g++.exe",
+    "linker": "ld.exe",
+    "clang_flags": [
+        "-pipe",
+        "-m32",
+        "-O3",
+        "-nostdlib",
+        "-Werror",
+        "-masm=intel",
+        "-std=c++20",
+        "-march=core2"
+    ],
+    "gcc_flags": [
+        "-pipe",
+        "-m32",
+        "-Os",
+        "-fno-exceptions",
+        "-nostdlib",
+        "-nostartfiles",
+        "-fpermissive",
+        "-masm=intel",
+        "-std=c++20",
+        "-march=core2",
+        "-mfpmath=both"
+    ],
+    "asm_flags": [
+        "-pipe",
+        "-m32",
+        "-Os",
+        "-fno-exceptions",
+        "-nostdlib",
+        "-nostartfiles",
+        "-w",
+        "-fpermissive",
+        "-masm=intel",
+        "-std=c++20",
+        "-march=core2",
+        "-mfpmath=both"
+    ]
+}
