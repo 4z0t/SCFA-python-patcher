@@ -70,7 +70,8 @@ def parse_sect_map(file_path: Path) -> dict[str, str]:
 
         line = f.readline()
         while not line.startswith(" *(.data*)"):
-            items = SPACES_RE.sub(" ", line.strip().replace("::", "__")).split("(")[0].split(" ")
+            items = SPACES_RE.sub(" ", line.strip().replace(
+                "::", "__")).split("(")[0].split(" ")
             if len(items) != 2 or items[1].startswith("?"):
                 line = f.readline()
                 continue
@@ -87,7 +88,8 @@ def parse_sect_map(file_path: Path) -> dict[str, str]:
 
         line = f.readline()
         while not line.startswith(" *(.bss*)"):
-            items = SPACES_RE.sub(" ", line.strip().replace("::", "__")).split(" ")
+            items = SPACES_RE.sub(
+                " ", line.strip().replace("::", "__")).split(" ")
             if len(items) != 2 or items[1].startswith("?"):
                 line = f.readline()
                 continue
@@ -104,7 +106,8 @@ def parse_sect_map(file_path: Path) -> dict[str, str]:
 
         line = f.readline()
         while not line.startswith(" *(.rdata)"):
-            items = SPACES_RE.sub(" ", line.strip().replace("::", "__")).split(" ")
+            items = SPACES_RE.sub(
+                " ", line.strip().replace("::", "__")).split(" ")
             if len(items) != 2 or items[1].startswith("?"):
                 line = f.readline()
                 continue
@@ -255,6 +258,13 @@ def patch(config_path):
     include_folder_path = config.target_folder_path / "include"
     hooks_folder_path = config.target_folder_path / "hooks"
     build_folder_path = config.build_folder_path
+    build_hooks_folder = build_folder_path / "hooks"
+
+    build_folder_path.mkdir(parents=True, exist_ok=True)
+    build_hooks_folder.mkdir(parents=True, exist_ok=True)
+
+    remove_files_at(build_folder_path, "**/*.o")
+    remove_files_at(build_hooks_folder, "*.hook.cpp")
 
     with open(section_folder_path / "main.cpp", "w") as main_file:
         for path in list_files_at(section_folder_path, "**/*.cpp", {"main.cpp"}):
@@ -278,29 +288,33 @@ def patch(config_path):
             {config.gcc_path} {" ".join(config.gcc_flags)}                                       -I {include_folder_path}             -Wl,-T,section.ld,--image-base,{image_base},-s,-Map,sectmap.txt,-o,section.pe             {section_folder_path / "main.cpp"}"""):
                 raise Exception("Errors occurred during building of patch files")
 
-    remove_files_at(build_folder_path, "**/*.o")
-    remove_files_at(hooks_folder_path, "*.hook.cpp")
-
     addresses = parse_sect_map(build_folder_path / "sectmap.txt")
 
-    def generate_hook_files(folder_path: Path):
-        for file_path in list_files_at(folder_path, "**/*.hook"):
-            hook = Hook.load_hook(folder_path/file_path, addresses)
+    def generate_hook_files(source_path: Path, output_path: Path):
+        for file_path in list_files_at(source_path, "**/*.hook"):
+            hook = Hook.load_hook(source_path/file_path, addresses)
             hook_path = file_path.replace(os.sep, "_") + ".cpp"
             print(f"Generating {hook_path}")
-            with open(folder_path/hook_path, "w") as f:
+            with open(output_path/hook_path, "w") as f:
                 f.write(hook.to_cpp())
 
-    generate_hook_files(config.target_folder_path/"hooks")
+    generate_hook_files(config.target_folder_path/"hooks", build_hooks_folder)
 
     if run_system(
-        t"""cd {build_folder_path} &
-            {config.gcc_path} -c {" ".join(config.asm_flags)} {hooks_folder_path / "*.cpp"}"""):
-                raise Exception("Errors occurred during building of hooks files")
+        t"""cd {build_hooks_folder} &
+            {config.gcc_path} -c {" ".join(config.asm_flags)} {build_hooks_folder / "*.cpp"}"""):                raise Exception(
+                    "Errors occurred during building of generated hooks files")
+
+    for hook_path in list_files_at(hooks_folder_path, "**/*.cpp"):
+        print(f"Hook file {hook_path} is deprecated, use .hook file instead")
+
+    if run_system(
+        t"""cd {build_hooks_folder} &
+            {config.gcc_path} -c {" ".join(config.asm_flags)} {hooks_folder_path / "*.cpp"}"""):                raise Exception("Errors occurred during building of hooks files")
 
     hooks: list[COFFData] = []
-    for path in list_files_at(build_folder_path, "**/*.o"):
-        coff_data = COFFData(build_folder_path / path, path)
+    for path in list_files_at(build_hooks_folder, "**/*.o"):
+        coff_data = COFFData(build_hooks_folder / path, path)
         for sect in coff_data.sects:
             if len(sect.name) >= 8:
                 raise Exception(f"sect name too long {sect.name}")
@@ -331,7 +345,7 @@ def patch(config_path):
             for sect in hook.sects:
                 pld.writelines([
                     f" .h{hi:X} 0x{sect.offset:x} : SUBALIGN(1) {{\n",
-                    f"     {hook.name}({sect.name}) /* size : {sect.size} */ \n",
+                    f"     hooks/{hook.name}({sect.name}) /* size : {sect.size} */ \n",
                     " }\n",
                 ])
                 hi += 1
@@ -420,6 +434,3 @@ def patch(config_path):
                 nf.write(sect.to_bytes())
 
     save_new_base_data(base_file_data)
-
-    remove_files_at(build_folder_path, "**/*.o")
-    remove_files_at(hooks_folder_path, "*.hook.cpp")
