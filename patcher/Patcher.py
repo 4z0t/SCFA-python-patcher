@@ -346,7 +346,7 @@ def patch(config_path):
             for sect in hook.sects:
                 pld.writelines([
                     f" .h{hi:X} 0x{sect.offset:x} : SUBALIGN(1) {{\n",
-                    f"     hooks/{hook.name}({sect.name}) /* size : {sect.size} */ \n",
+                    f"     hooks/{hook.name}({sect.name}) /* size : {sect.size} */\n",
                     " }\n",
                 ])
                 hi += 1
