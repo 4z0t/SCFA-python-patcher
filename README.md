@@ -67,7 +67,7 @@ config structure:
         "-std=c++20",
         "-march=core2",
         "-mfpmath=both"
-    ],
+    ]
 }
 ```
 
