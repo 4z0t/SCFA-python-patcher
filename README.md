@@ -21,7 +21,7 @@ config structure:
     "target_folder_path": "FA-Binary-Patches",
     // path to build folder. Defaults to "{target_folder_path}/build"
     "build_folder_path": null,
-    // names of input and output files
+    // paths of input and output files
     "input_exe_path": "ForgedAlliance_base.exe",
     "output_exe_path": "C:\\ProgramData\\FAForever\\bin\\ForgedAlliance_exxt.exe",
     // path to clang++ compiler. Defaults to "clang++"
