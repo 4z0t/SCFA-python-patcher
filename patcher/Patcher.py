@@ -299,6 +299,7 @@ def patch(config_path):
                 f.write(hook.to_cpp())
 
     generate_hook_files(config.target_folder_path/"hooks", build_hooks_folder)
+    generate_hook_files(config.target_folder_path/"section", build_hooks_folder)
 
     if run_system(
         t"""cd {build_hooks_folder} &
