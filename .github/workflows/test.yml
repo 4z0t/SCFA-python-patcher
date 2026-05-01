@@ -69,4 +69,4 @@ jobs:
       - name: Patch base executable
         run: |
           mkdir FA-Binary-Patches/build
-          cd fa-python-binary-patcher & python main.py config.json
+          cd fa-python-binary-patcher & python main.py FA-Binary-Patches/config.json
