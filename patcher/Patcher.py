@@ -123,7 +123,12 @@ def parse_sect_map(file_path: Path) -> dict[str, str]:
 
             line = f.readline()
 
-    addresses = {name.split('@')[0]: address for name,
+    def get_func_name(name):
+        if name.startswith("@"):
+            name = name[1:]
+        return name.split('@')[0]
+
+    addresses = {get_func_name(name): address for name,
                  address in addresses.items()}
     addresses = {name: address for name,
                  address in addresses.items() if name}
