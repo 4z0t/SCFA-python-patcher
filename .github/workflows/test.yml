@@ -41,8 +41,6 @@ jobs:
       # clone everything that we need
       - uses: actions/checkout@v4
         with:
-          repository: FAForever/FA-Binary-Patches
-          ref: 'master'
           path: .
 
       - uses: actions/checkout@v4
@@ -52,7 +50,7 @@ jobs:
       # install everything that we need
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install MinGW i686
         run: choco install mingw --x86 -y --no-progress
@@ -60,17 +58,13 @@ jobs:
       - name: Update PATH
         run: echo C:/ProgramData/mingw64/mingw32/bin/ >> $env:GITHUB_PATH
 
-      - name: Install fa-python-binary-patcher
-        run: |
-          pip install -r ./fa-python-binary-patcher/requirements.txt
-
       # download base executable
       - name: Download base executable
         run: | 
-          curl -L "https://content.faforever.com/build/ForgedAlliance_base.exe" -o ForgedAlliance_base.exe
+          curl -L "https://content.faforever.com/build/ForgedAlliance_base.exe" -o FA-Binary-Patches/ForgedAlliance_base.exe
 
       # patch it, if it works then we're good
       - name: Patch base executable
         run: |
-          mkdir build
-          python ./fa-python-binary-patcher/main.py "$(pwd)" clang++ ld g++
+          mkdir FA-Binary-Patches/build
+          cd fa-python-binary-patcher & python main.py FA-Binary-Patches/build_config.json
