@@ -4,6 +4,18 @@ from pathlib import Path
 ADDRESS_RE = re.compile(r"^(0[xX][0-9A-Fa-f]{6,8})\:$")
 FUNCTION_NAME_RE = re.compile(r"@([a-zA-Z\_][a-zA-Z0-9\_]+)")
 ESCAPE_TRANSLATION = str.maketrans({"\"":  r"\"", "\\": r"\\", })
+NOP_MULT_RE = re.compile(r"nop\s+([1-9][0-9]*)", re.IGNORECASE)
+CLEAR_RE = re.compile(r"clear\s+([1-9][0-9]*)", re.IGNORECASE)
+
+
+def replace_mulinop(match: re.Match[str]) -> str:
+    count = int(match.group(1))
+    return f"/* {count} */ " + ";".join(["nop"] * count)
+
+
+def replace_int3(match: re.Match[str]) -> str:
+    count = int(match.group(1))
+    return f"/* {count} */ " + ";".join(["int 3"] * count)
 
 
 class Section:
@@ -26,6 +38,12 @@ class Section:
 
             if FUNCTION_NAME_RE.findall(line):
                 line = FUNCTION_NAME_RE.subn(replace_address, line)[0]
+
+            if NOP_MULT_RE.findall(line):
+                line = NOP_MULT_RE.subn(replace_mulinop, line)[0]
+
+            if CLEAR_RE.findall(line):
+                line = CLEAR_RE.subn(replace_int3, line)[0]
 
             s.append(f'{line};')
         return "\n".join(s)
